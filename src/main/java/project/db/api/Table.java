@@ -1,4 +1,4 @@
-package project.db;
+package project.db.api;
 
 import java.util.List;
 import java.util.Optional;
