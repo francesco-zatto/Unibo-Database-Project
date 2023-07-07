@@ -36,4 +36,8 @@ public final class ConnectionProvider {
             throw new IllegalStateException("Could not establish a connection with db", e);
         }
     }
+
+    public static void main(String[] args) {
+        new ConnectionProvider("Admin", "password", "Ristorante").getMySQLConnection();
+    }
 }
