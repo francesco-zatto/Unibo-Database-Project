@@ -3,7 +3,7 @@ package project.model;
 import java.util.Date;
 import java.util.Optional;
 
-public class Dipendente {
+public class Dipendente implements DatabaseObject<String> {
     
     private final String codice;
     private final String codiceFiscale;
@@ -68,6 +68,11 @@ public class Dipendente {
 
     public Optional<String> getTipologiaPulizia() {
         return tipologiaPulizia;
+    }
+
+    @Override
+    public String getPrimaryKey() {
+        return getCodice();
     }
     
 }

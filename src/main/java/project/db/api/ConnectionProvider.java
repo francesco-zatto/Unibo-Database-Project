@@ -38,6 +38,6 @@ public final class ConnectionProvider {
     }
 
     public static void main(String[] args) {
-        new ConnectionProvider("Admin", "password", "Ristorante").getMySQLConnection();
+        System.out.println();new ConnectionProvider("root", "Database1!", "restaurant").getMySQLConnection();
     }
 }

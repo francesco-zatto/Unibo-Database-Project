@@ -2,7 +2,7 @@ package project.model;
 
 import java.util.Date;
 
-public class Contratto {
+public class Contratto implements DatabaseObject<String> {
 
     private final String codiceDipendente;
     private final Date dataFirma;
@@ -36,6 +36,11 @@ public class Contratto {
 
     public int getStipendioMensile() {
         return stipendioMensile;
+    }
+
+    @Override
+    public String getPrimaryKey() {
+        return codiceDipendente + dataFirma;
     }
 
 }
