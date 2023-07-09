@@ -4,7 +4,9 @@ import java.util.List;
 
 public interface View {
 
-    void start();
+    void startGUI();
+
+    List<String> startConnection();
 
     List<String> runQuery();
 
