@@ -6,7 +6,7 @@ public interface View {
 
     void startGUI();
 
-    List<String> startConnection();
+    void startConnection();
 
     List<String> runQuery();
 

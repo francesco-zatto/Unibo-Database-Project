@@ -3,6 +3,7 @@ package project.db.api;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Optional;
 
 /**
  * Expose a utility method to connect to a MySQL database 
@@ -27,17 +28,14 @@ public final class ConnectionProvider {
      * @return a Connection with the database specified in the class constructor
      * @throws IllegalStateException if the connection could not be establish
      */
-    public Connection getMySQLConnection() {
+    public Optional<Connection> getMySQLConnection() {
         final String dbUri = "jdbc:mysql://localhost:3306/" + this.dbName;
         try {
             // Thanks to the JDBC DriverManager we can get a connection to the database
-            return DriverManager.getConnection(dbUri, this.username, this.password);
+            return Optional.of(DriverManager.getConnection(dbUri, this.username, this.password));
         } catch (final SQLException e) {
-            throw new IllegalStateException("Could not establish a connection with db", e);
+            return Optional.empty();
         }
     }
 
-    public static void main(String[] args) {
-        System.out.println();new ConnectionProvider("root", "Database1!", "restaurant").getMySQLConnection();
-    }
 }
