@@ -1,6 +1,8 @@
 package project.db.tables;
 
+import java.sql.Connection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import project.db.api.Table;
@@ -8,10 +10,16 @@ import project.model.Prodotto;
 
 public class ProdottiTable implements Table<Prodotto, String> {
 
-    @Override
+    private static final String TABLE_NAME = "Prodotti";
+    private final Connection connection; 
+
+    public ProdottiTable(final Connection connection) {
+         this.connection = Objects.requireNonNull(connection);
+    }
+
+       @Override
     public String getTableName() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getTableName'");
+        return TABLE_NAME;
     }
 
     @Override

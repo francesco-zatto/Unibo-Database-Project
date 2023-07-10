@@ -1,6 +1,8 @@
 package project.db.tables;
 
+import java.sql.Connection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import project.db.api.Table;
@@ -8,10 +10,16 @@ import project.model.StrutturazioneMenu;
 
 public class StrutturazioneMenuTable implements Table<StrutturazioneMenu, String> {
 
+    private static final String TABLE_NAME = "StrutturazioneMenu";
+    private final Connection connection; 
+
+    public StrutturazioneMenuTable(final Connection connection) {
+         this.connection = Objects.requireNonNull(connection);
+    }
+
     @Override
     public String getTableName() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getTableName'");
+        return TABLE_NAME;
     }
 
     @Override
