@@ -29,6 +29,5 @@ public enum RestaurantQuery {
     public String toString() {
         return this.operation;
     }
-
     
 }
