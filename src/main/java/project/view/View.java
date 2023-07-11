@@ -8,6 +8,10 @@ public interface View {
 
     void startConnection();
 
+    void loadTableNames(List<String> names);
+
+    void viewTable(List<String> columns, List<List<String>> results);
+
     List<String> runQuery();
 
     void showResult(List<List<String>> resultList);

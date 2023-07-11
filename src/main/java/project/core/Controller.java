@@ -30,8 +30,17 @@ public class Controller {
         return this.connection.isPresent();
     }
 
+    public void loadTableNames() {
+        this.view.loadTableNames(this.database.getTableNames());
+    }
+
+    public void loadTable(String name) {
+        var table = this.database.getTable(name);
+        this.view.viewTable(table.get(0), table.subList(1, table.size()));
+    }
+
     public Optional<List<List<String>>> runQuery(RestaurantQuery query) {
-        //TODO
+        return null; //TODO
     }
     
 }
