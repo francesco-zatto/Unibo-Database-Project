@@ -1,6 +1,7 @@
 package project.view;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -11,13 +12,16 @@ import java.util.List;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.JWindow;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
@@ -28,7 +32,6 @@ public class SwingView implements View{
 
     private static final Dimension SCREEN_DIMENSION = Toolkit.getDefaultToolkit().getScreenSize();
     private static final int LENGTH_FIELD = 20;
-    private static final int START_TABLE_SIZE = 10;
 
     private final Controller controller;
     private final JFrame frame = new JFrame("RESTAURANT DATABASE");
@@ -63,12 +66,6 @@ public class SwingView implements View{
     }
 
     @Override
-    public void showResult(List<List<String>> resultList) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'showResult'");
-    }
-
-    @Override
     public void startConnection() {
         this.frame.remove(this.accessPanel);
         this.controller.loadTableNames();
@@ -96,6 +93,25 @@ public class SwingView implements View{
         this.output.setModel(tableModel);
         this.output.setEnabled(false);
         this.output.sizeColumnsToFit(-1);
+    }
+
+    @Override
+    public void printControlMessage(boolean insertCorrect) {
+        if (!insertCorrect) {
+            JOptionPane.showMessageDialog(
+                this.frame, 
+                "Inserimento Errato!", 
+                "!", 
+                JOptionPane.WARNING_MESSAGE
+            );
+        } else {
+            JOptionPane.showMessageDialog(
+                this.frame, 
+                "Inserimento andato a buon fine!", 
+                "OK!", 
+                JOptionPane.PLAIN_MESSAGE
+            );
+        }
     }
 
     private void buildAccessPanel() {
@@ -163,6 +179,9 @@ public class SwingView implements View{
             pairPanel.add(this.fieldList.get(i));
             this.insertPanel.add(pairPanel);
         }
+        JButton clearButton = new JButton("Clear text fields");
+        clearButton.addActionListener(e -> this.fieldList.forEach(f -> f.setText("")));
+        this.insertPanel.add(clearButton);
         this.frame.pack();
     }
 

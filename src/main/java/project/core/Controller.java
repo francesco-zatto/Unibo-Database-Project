@@ -40,8 +40,7 @@ public class Controller {
     }
 
     public void insertInTable(List<String> elements, String table) {
-        this.database.insertInTable(elements, table);
-        //TODO
+        this.view.printControlMessage(this.database.insertInTable(elements, table));
     }
 
     public Optional<List<List<String>>> runQuery(RestaurantQuery query) {

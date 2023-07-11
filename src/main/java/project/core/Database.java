@@ -1,10 +1,13 @@
 package project.core;
 
 import java.sql.Connection;
+import java.sql.JDBCType;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -71,39 +74,58 @@ public class Database {
     }
 
     public boolean insertInTable(List<String> elements, String table) {
+        List<String> elementsWithNulls = elements.stream()
+            .map(e -> {
+                if (e.isBlank()) return (String)(null);
+                return e;
+            }).toList();
         int numberColumns = findNumberOfColumns(table);
-        String values = new StringBuilder().append("(")
+        List<Integer> tableTypes = findTableTypes(table);
+        String values = this.getValues(numberColumns);
+        String query = "INSERT " + table + " VALUES " + values;
+        try {
+            PreparedStatement statement = connection.prepareStatement(query);
+            for (int i = 0; i < numberColumns; i++) {
+                statement.setObject(i + 1, elementsWithNulls.get(i), tableTypes.get(i));
+            }
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    private List<Integer> findTableTypes(String table) {
+        List<Integer> tableTypes = new LinkedList<>();
+        String query = "SELECT DATA_TYPE from INFORMATION_SCHEMA.COLUMNS " +
+            "where table_schema = 'restaurant' AND table_name = '" + table + "'";
+        ResultSet resultSet;
+        try {
+            Statement statement = connection.createStatement();
+            resultSet = statement.executeQuery(query);
+            while (resultSet.next()) {
+                tableTypes.add(getJDBCType(resultSet));
+            }
+            return tableTypes;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return List.of();
+    }
+
+    private Integer getJDBCType(ResultSet resultSet) throws SQLException {
+        if (resultSet.getString(1).equals("int")) {
+            return JDBCType.INTEGER.getVendorTypeNumber();
+        } 
+        return JDBCType.valueOf(resultSet.getString(1).toUpperCase()).getVendorTypeNumber();
+    }
+
+    private String getValues(int numberColumns) {
+        return new StringBuilder().append("(")
             .append(String.join(",", getIteratorValues(numberColumns)))
             .append(")")
             .toString();
-        System.out.println(values);
-        String query = "INSERT" + table + "VALUES";
-        ResultSet resultSet;
-        /*try {
-            Statement statement = connection.createStatement();
-            resultSet = statement.executeQuery(query);
-            ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
-            int columnCount = resultSetMetaData.getColumnCount();
-            for (int i = 1; i <= columnCount; i++) {
-                columns.add(resultSetMetaData.getColumnName(i));
-            }
-            list.add(columns);
-            while (resultSet.next()) {
-                List<String> rowData = new LinkedList<>();
-                for (int i = 1; i <= columnCount; i++) {
-                    Optional<Object> currentElement = Optional.ofNullable(resultSet.getObject(i));
-                    if (currentElement.isEmpty()) {
-                        rowData.add(NULL_VALUE);
-                    } else {
-                        rowData.add(currentElement.get().toString());
-                    }
-                }
-                list.add(rowData);
-            }
-        } catch (SQLException e) {
-            return false;
-        }*/
-        return true;
     }
 
     private Iterable<CharSequence> getIteratorValues(int number) {

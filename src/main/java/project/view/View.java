@@ -12,8 +12,8 @@ public interface View {
 
     void viewTable(List<String> columns, List<List<String>> results);
 
-    List<String> runQuery();
+    void printControlMessage(boolean insertCorrect);
 
-    void showResult(List<List<String>> resultList);
+    List<String> runQuery();
     
 }
