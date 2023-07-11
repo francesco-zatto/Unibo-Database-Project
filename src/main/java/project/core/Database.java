@@ -5,6 +5,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -59,7 +60,6 @@ public class Database {
                         rowData.add(NULL_VALUE);
                     } else {
                         rowData.add(currentElement.get().toString());
-                        System.out.println(currentElement.get().toString());
                     }
                 }
                 list.add(rowData);
@@ -68,6 +68,82 @@ public class Database {
             return List.of();
         }
         return list;
+    }
+
+    public boolean insertInTable(List<String> elements, String table) {
+        int numberColumns = findNumberOfColumns(table);
+        String values = new StringBuilder().append("(")
+            .append(String.join(",", getIteratorValues(numberColumns)))
+            .append(")")
+            .toString();
+        System.out.println(values);
+        String query = "INSERT" + table + "VALUES";
+        ResultSet resultSet;
+        /*try {
+            Statement statement = connection.createStatement();
+            resultSet = statement.executeQuery(query);
+            ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
+            int columnCount = resultSetMetaData.getColumnCount();
+            for (int i = 1; i <= columnCount; i++) {
+                columns.add(resultSetMetaData.getColumnName(i));
+            }
+            list.add(columns);
+            while (resultSet.next()) {
+                List<String> rowData = new LinkedList<>();
+                for (int i = 1; i <= columnCount; i++) {
+                    Optional<Object> currentElement = Optional.ofNullable(resultSet.getObject(i));
+                    if (currentElement.isEmpty()) {
+                        rowData.add(NULL_VALUE);
+                    } else {
+                        rowData.add(currentElement.get().toString());
+                    }
+                }
+                list.add(rowData);
+            }
+        } catch (SQLException e) {
+            return false;
+        }*/
+        return true;
+    }
+
+    private Iterable<CharSequence> getIteratorValues(int number) {
+        return new Iterable<CharSequence>() {
+
+            @Override
+            public Iterator<CharSequence> iterator() {
+                return new Iterator<CharSequence>() {
+
+                    private int count = 0;
+
+                    @Override
+                    public boolean hasNext() {
+                        return count < number;
+                    }
+
+                    @Override
+                    public CharSequence next() {
+                        count++;
+                        return "?";
+                    }
+                };
+            
+            } 
+        };
+    }
+
+    private int findNumberOfColumns(String table) {
+        String query = "SELECT count(*) FROM information_schema.columns WHERE table_name = '" + table + "'";
+        ResultSet resultSet;
+        try {
+            Statement statement = connection.createStatement();
+            resultSet = statement.executeQuery(query);
+            while (resultSet.next()) {
+                return resultSet.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getSQLState());
+        }
+        return 0;
     }
 
     public Optional<List<List<String>>> runQuery(RestaurantQuery query) {

@@ -39,8 +39,13 @@ public class Controller {
         this.view.viewTable(table.get(0), table.subList(1, table.size()));
     }
 
+    public void insertInTable(List<String> elements, String table) {
+        this.database.insertInTable(elements, table);
+        //TODO
+    }
+
     public Optional<List<List<String>>> runQuery(RestaurantQuery query) {
-        return null; //TODO
+        return this.database.runQuery(query);
     }
     
 }
