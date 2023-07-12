@@ -14,13 +14,13 @@ import java.util.Optional;
 
 import project.db.api.RestaurantQuery;
 
-public class Database {
+public class DatabaseImpl {
 
     private static final String NULL_VALUE = "NULL";
 
     private final Connection connection;
 
-    public Database(Connection connection) {
+    public DatabaseImpl(Connection connection) {
         this.connection = connection;
     }
 

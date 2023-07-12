@@ -6,6 +6,8 @@ import java.util.Optional;
 
 import project.db.api.ConnectionProvider;
 import project.db.api.RestaurantQuery;
+import project.query.Database;
+import project.query.DatabaseImpl;
 import project.view.SwingView;
 import project.view.View;
 
@@ -25,7 +27,7 @@ public class Controller {
         this.connectionProvider = new ConnectionProvider(username, password, DATABASE_NAME);
         this.connection = this.connectionProvider.getMySQLConnection();
         if (this.connection.isPresent()) {
-            this.database = new Database(this.connection.get());
+            this.database = new DatabaseImpl(this.connection.get());
         }
         return this.connection.isPresent();
     }
