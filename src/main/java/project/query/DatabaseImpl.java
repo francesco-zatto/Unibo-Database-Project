@@ -1,4 +1,4 @@
-package project.core;
+package project.query;
 
 import java.sql.Connection;
 import java.sql.JDBCType;
@@ -14,7 +14,7 @@ import java.util.Optional;
 
 import project.db.api.RestaurantQuery;
 
-public class DatabaseImpl {
+public class DatabaseImpl implements Database {
 
     private static final String NULL_VALUE = "NULL";
 
@@ -24,6 +24,7 @@ public class DatabaseImpl {
         this.connection = connection;
     }
 
+    @Override
     public List<String> getTableNames() {
         List<String> list = new LinkedList<>();
         String query = "SELECT table_name FROM information_schema.tables WHERE table_schema = 'restaurant'";
@@ -40,6 +41,7 @@ public class DatabaseImpl {
         return list;
     }
 
+    @Override
     public List<List<String>> getTable(String tableName) {
         List<String> columns = new LinkedList<>();
         List<List<String>> list = new LinkedList<>();
@@ -72,6 +74,7 @@ public class DatabaseImpl {
         return list;
     }
 
+    @Override
     public boolean insertInTable(List<String> elements, String table) {
         List<String> elementsWithNulls = elements.stream()
             .map(e -> {
@@ -92,6 +95,68 @@ public class DatabaseImpl {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public List<String> getQueryValues(RestaurantQuery query) {
+        switch (query) {
+            case INSERIRE_CONTO_A_PRENOTAZIONE_SALVATA:
+                return List.of("Conto", "CodPrenotazione");
+            case VISUALIZZARE_ALLERGENI_PIATTO:
+                return List.of("CodPiatto");
+            case VISUALIZZARE_DIPENDENTE_STIPENDIO_MASSIMO:
+                return List.of();
+            case VISUALIZZARE_FORNITORI_DI_INGREDIENTE:
+                return List.of("CodIngrediente");
+            case VISUALIZZARE_INCASSO_TURNO:
+                return List.of("Data", "OraInizioTurno", "OraFineTurno");
+            case VISUALIZZARE_PORTATA_CUOCO_GIORNO:
+                return List.of("Data", "CodiceCuoco");
+            case VISUALIZZARE_PRENOTAZIONI_CON_SLOT_AGGIUNTIVO:
+                return List.of("Data");
+            case VISUALIZZARE_TAVOLI_PRENOTATI_IN_SALA_E_SLOT:
+                return List.of("NumeroSala", "CodSlot");
+        }
+        return List.of();
+    }
+
+    @Override
+    public Optional<List<List<String>>> runQuery(RestaurantQuery query, List<String> values) {
+        List<List<String>> resultList = new LinkedList<>();
+        try {
+            switch (query) {
+            case INSERIRE_CONTO_A_PRENOTAZIONE_SALVATA:
+                insertContoPrenotazioneSalvata(values, resultList);
+                break;
+            case VISUALIZZARE_ALLERGENI_PIATTO:
+                viewAllergeniPiatto(values, resultList);
+                break;
+            case VISUALIZZARE_DIPENDENTE_STIPENDIO_MASSIMO:
+                viewDipendenteStipendioMassimo(resultList);
+                break;
+            case VISUALIZZARE_FORNITORI_DI_INGREDIENTE:
+                viewFornitoriDiIngrediente(values, resultList);
+                break;
+            case VISUALIZZARE_INCASSO_TURNO:
+                viewIncassoTurno(values, resultList);
+                break;
+            case VISUALIZZARE_PORTATA_CUOCO_GIORNO:
+                viewPortataCuocoGiorno(values, resultList);
+                break;
+            case VISUALIZZARE_PRENOTAZIONI_CON_SLOT_AGGIUNTIVO:
+                viewPrenotazioniSlotAggiuntivo(values, resultList);
+                break;
+            case VISUALIZZARE_TAVOLI_PRENOTATI_IN_SALA_E_SLOT:
+                viewTavoliPrenotatiSalaSLot(values, resultList);
+                break;
+        }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return Optional.of(resultList).flatMap(l -> {
+            if (l.isEmpty()) return Optional.empty();
+            return Optional.of(l);
+        });        
     }
 
     private List<Integer> findTableTypes(String table) {
@@ -164,66 +229,6 @@ public class DatabaseImpl {
             System.out.println(e.getSQLState());
         }
         return 0;
-    }
-
-    public List<String> getQueryValues(RestaurantQuery query) {
-        switch (query) {
-            case INSERIRE_CONTO_A_PRENOTAZIONE_SALVATA:
-                return List.of("Conto", "CodPrenotazione");
-            case VISUALIZZARE_ALLERGENI_PIATTO:
-                return List.of("CodPiatto");
-            case VISUALIZZARE_DIPENDENTE_STIPENDIO_MASSIMO:
-                return List.of();
-            case VISUALIZZARE_FORNITORI_DI_INGREDIENTE:
-                return List.of("CodIngrediente");
-            case VISUALIZZARE_INCASSO_TURNO:
-                return List.of("Data", "OraInizioTurno", "OraFineTurno");
-            case VISUALIZZARE_PORTATA_CUOCO_GIORNO:
-                return List.of("Data", "CodiceCuoco");
-            case VISUALIZZARE_PRENOTAZIONI_CON_SLOT_AGGIUNTIVO:
-                return List.of("Data");
-            case VISUALIZZARE_TAVOLI_PRENOTATI_IN_SALA_E_SLOT:
-                return List.of("NumeroSala", "CodSlot");
-        }
-        return List.of();
-    }
-
-    public Optional<List<List<String>>> runQuery(RestaurantQuery query, List<String> values) {
-        List<List<String>> resultList = new LinkedList<>();
-        try {
-            switch (query) {
-            case INSERIRE_CONTO_A_PRENOTAZIONE_SALVATA:
-                insertContoPrenotazioneSalvata(values, resultList);
-                break;
-            case VISUALIZZARE_ALLERGENI_PIATTO:
-                viewAllergeniPiatto(values, resultList);
-                break;
-            case VISUALIZZARE_DIPENDENTE_STIPENDIO_MASSIMO:
-                viewDipendenteStipendioMassimo(resultList);
-                break;
-            case VISUALIZZARE_FORNITORI_DI_INGREDIENTE:
-                viewFornitoriDiIngrediente(values, resultList);
-                break;
-            case VISUALIZZARE_INCASSO_TURNO:
-                viewIncassoTurno(values, resultList);
-                break;
-            case VISUALIZZARE_PORTATA_CUOCO_GIORNO:
-                viewPortataCuocoGiorno(values, resultList);
-                break;
-            case VISUALIZZARE_PRENOTAZIONI_CON_SLOT_AGGIUNTIVO:
-                viewPrenotazioniSlotAggiuntivo(values, resultList);
-                break;
-            case VISUALIZZARE_TAVOLI_PRENOTATI_IN_SALA_E_SLOT:
-                viewTavoliPrenotatiSalaSLot(values, resultList);
-                break;
-        }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return Optional.of(resultList).flatMap(l -> {
-            if (l.isEmpty()) return Optional.empty();
-            return Optional.of(l);
-        });        
     }
 
     private void viewTavoliPrenotatiSalaSLot(List<String> values, List<List<String>> resultList) throws SQLException {

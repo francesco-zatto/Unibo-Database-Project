@@ -1,4 +1,4 @@
-package project.core;
+package project.query;
 
 import java.util.List;
 import java.util.Optional;
