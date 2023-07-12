@@ -1,4 +1,6 @@
-package project.core;
+package project;
+
+import project.core.Controller;
 
 public class Main {
     

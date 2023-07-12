@@ -14,7 +14,7 @@ dependencies {
 }
 
 application {
-    mainClass.set("project.core.Main")
+    mainClass.set("project.Main")
 }
 
 tasks.named<Test>("test") {
