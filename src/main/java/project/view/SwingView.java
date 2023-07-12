@@ -56,12 +56,6 @@ public class SwingView implements View{
     }
 
     @Override
-    public List<String> runQuery() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'runQuery'");
-    }
-
-    @Override
     public void startConnection() {
         this.frame.remove(this.accessPanel);
         this.controller.loadTableNames();

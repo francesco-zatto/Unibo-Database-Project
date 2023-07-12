@@ -15,7 +15,5 @@ public interface View {
     void printControlMessage(boolean insertCorrect);
 
     void viewQueryValues(List<String> values);
-
-    List<String> runQuery();
     
 }
