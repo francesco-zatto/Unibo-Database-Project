@@ -2,15 +2,6 @@ package project.db.api;
 
 public enum RestaurantQuery {
 
-    INSERIRE_NUOVA_PRENOTAZIONE("Inserire una nuova prenotazione"),
-    INSERIRE_CONTRATTO_DIPENDENTE("Inserire un contratto di un dipendente"),
-    AGGIUNGERE_TAVOLO_RISTORANTE("Aggiungere un tavolo al ristorante"),
-    REGISTRARE_ORDINE_FORNITORE("Registrare un ordine da parte di un fornitore"),
-    REGISTRARE_PAGAMENTO_TASSA("Registrare il pagamento di una tassa"),
-    REGISTRARE_PAGAMENTO_FATTURA("Registrare il pagamento di una fattura"),
-    AGGIUNGERE_PIATTO("Aggiungere un piatto"),
-    AGGIUNGERE_MENU("Aggiungere un menu"),
-    AGGIUNGERE_CONTO("Aggiungere il conto a una prenotazione già salvata"),
     VISUALIZZARE_TAVOLI_PRENOTATI_IN_SALA_E_SLOT("Visualizzare i tavoli prenotati in una certa sala e in un certo slot"),
     VISUALIZZARE_PORTATA_CUOCO_GIORNO("Visualizzare la portata di cui è stato responsabile un cuoco in un certo giorno"),
     VISUALIZZARE_ALLERGENI_PIATTO("Visualizzare gli allergeni di un piatto"),

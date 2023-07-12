@@ -43,8 +43,15 @@ public class Controller {
         this.view.printControlMessage(this.database.insertInTable(elements, table));
     }
 
-    public Optional<List<List<String>>> runQuery(RestaurantQuery query) {
-        return this.database.runQuery(query);
+    public void loadQueryValues(RestaurantQuery query) {
+        this.view.viewQueryValues(this.database.getQueryValues(query));
+    }
+
+    public void runQuery(RestaurantQuery query, List<String> values) {
+        var table = this.database.runQuery(query, values);
+        if (table.isPresent()) {
+            this.view.viewTable(table.get().get(0), table.get().subList(1, table.get().size()));
+        }
     }
     
 }

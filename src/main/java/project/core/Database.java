@@ -7,7 +7,6 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Types;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -90,7 +89,6 @@ public class Database {
             }
             statement.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
             return false;
         }
         return true;
@@ -168,29 +166,83 @@ public class Database {
         return 0;
     }
 
-    public Optional<List<List<String>>> runQuery(RestaurantQuery query) {
+    public List<String> getQueryValues(RestaurantQuery query) {
         switch (query) {
-            case AGGIUNGERE_CONTO:
-                break;
-            case AGGIUNGERE_MENU:
-                break;
-            case AGGIUNGERE_PIATTO:
-                break;
-            case AGGIUNGERE_TAVOLO_RISTORANTE:
-                break;
-            case INSERIRE_CONTRATTO_DIPENDENTE:
-                break;
-            case INSERIRE_NUOVA_PRENOTAZIONE:
-                break;
-            case REGISTRARE_ORDINE_FORNITORE:
-                break;
-            case REGISTRARE_PAGAMENTO_FATTURA:
-                break;
-            case REGISTRARE_PAGAMENTO_TASSA:
-                break;
             case VISUALIZZARE_ALLERGENI_PIATTO:
+                return List.of("CodPiatto");
+            case VISUALIZZARE_DIPENDENTE_STIPENDIO_MASSIMO:
+                return List.of();
+            case VISUALIZZARE_FORNITORI_DI_INGREDIENTE:
+                return List.of("CodIngrediente");
+            case VISUALIZZARE_INCASSO_TURNO:
+                return List.of("Data", "OraInizioTurno", "OraFineTurno");
+            case VISUALIZZARE_PORTATA_CUOCO_GIORNO:
+                return List.of("Data");
+            case VISUALIZZARE_PRENOTAZIONI_CON_SLOT_AGGIUNTIVO:
+                return List.of("Data");
+            case VISUALIZZARE_TAVOLI_PRENOTATI_IN_SALA_E_SLOT:
+                return List.of("NumeroSala", "CodSlot");
+        }
+        return List.of();
+    }
+
+    public Optional<List<List<String>>> runQuery(RestaurantQuery query, List<String> values) {
+        List<List<String>> resultList = new LinkedList<>();
+        String queryString;
+        PreparedStatement statement;
+        ResultSet resultSet;
+        try {
+            switch (query) {
+            case VISUALIZZARE_ALLERGENI_PIATTO:
+                queryString = "SELECT P.Nome, P.Descrizione " + 
+                    "FROM Prodotti P JOIN Ingredienti I ON P.CodiceEAN13 = I.CodiceProdotto " + 
+                    "WHERE P.TipoGenerico = 0 " + 
+                    "AND I.CodiceProdotto IN ( " + 
+                    "SELECT CodiceIngrediente " +
+                    "FROM Allergeni " +
+                    "WHERE CodicePiatto = ? " +
+                    ")";
+                resultList.add(List.of("NomeIngrediente", "Descrizione"));
+                statement = connection.prepareStatement(queryString);
+                statement.setObject(1, values.get(0), JDBCType.CHAR);
+                resultSet = statement.executeQuery();
+                while (resultSet.next()) {
+                    List<String> rowData = new LinkedList<>();
+                    Optional<Object> nome = Optional.of(resultSet.getObject(1));
+                    rowData.add(nome.get().toString());
+                    Optional<Object> descrizione = Optional.ofNullable(resultSet.getObject(2));
+                    if (descrizione.isEmpty()) {
+                        rowData.add(NULL_VALUE);
+                    } else {
+                        rowData.add(descrizione.get().toString());
+                    }
+                    resultList.add(rowData);
+                }
                 break;
             case VISUALIZZARE_DIPENDENTE_STIPENDIO_MASSIMO:
+                queryString = "SELECT D.Codice, D.CF, D.Nome, D.Cognome " +
+                    "FROM Dipendenti D, Contratti C " +  
+                    "WHERE C.CodDipendente = D.Codice " + 
+                    "AND D.Codice IN (SELECT CodDipendente FROM ContrattiCorrenti) " + 
+                    "ORDER BY C.StipendioMensile DESC " +
+                    "LIMIT 1";
+                resultList.add(List.of("Codice", "Codice Fiscale", "Nome", "Cognome"));
+                statement = connection.prepareStatement(queryString);
+                resultSet = statement.executeQuery();
+                while (resultSet.next()) {
+                    List<String> rowData = new LinkedList<>();
+                    Optional<Object> codice = Optional.of(resultSet.getObject(1));
+                    Optional<Object> CF = Optional.of(resultSet.getObject(2));
+                    Optional<Object> nome = Optional.of(resultSet.getObject(3));
+                    Optional<Object> cognome = Optional.of(resultSet.getObject(4));
+                    rowData.addAll(List.of(
+                        codice.get().toString(), 
+                        CF.get().toString(), 
+                        nome.get().toString(), 
+                        cognome.get().toString()
+                    ));
+                    resultList.add(rowData);
+                }
                 break;
             case VISUALIZZARE_FORNITORI_DI_INGREDIENTE:
                 break;
@@ -203,7 +255,10 @@ public class Database {
             case VISUALIZZARE_TAVOLI_PRENOTATI_IN_SALA_E_SLOT:
                 break;
         }
-        return null;        
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return Optional.of(resultList);        
     }
     
 }

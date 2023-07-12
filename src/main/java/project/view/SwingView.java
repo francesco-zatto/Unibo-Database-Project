@@ -114,6 +114,37 @@ public class SwingView implements View{
         }
     }
 
+    @Override
+    public void viewQueryValues(List<String> values) {
+        JFrame queryFrame = new JFrame("Inserire correttamente i dati:");
+        queryFrame.setLocation((int)(SCREEN_DIMENSION.getWidth() / 4), (int)(SCREEN_DIMENSION.getHeight() / 4));
+        JPanel queryPane = new JPanel();
+        List<JTextField> valueList = new LinkedList<>();
+        for (var value : values) {
+            JLabel label = new JLabel(value);
+            JTextField textField = new JTextField(LENGTH_FIELD);
+            valueList.add(textField);
+            JPanel pairPanel = new JPanel();
+            pairPanel.add(label);
+            pairPanel.add(textField);
+            queryPane.add(pairPanel);
+        }
+        JButton runQueryButton = new JButton("Run query");
+        runQueryButton.addActionListener(
+            e -> this.controller.runQuery(
+                (RestaurantQuery) this.queriesComboBox.getSelectedItem(), 
+                valueList.stream()
+                    .map(JTextField::getText)
+                    .toList()
+            )
+        );
+        queryPane.add(runQueryButton);
+        queryFrame.setContentPane(queryPane);
+        queryFrame.pack();
+        queryFrame.setAlwaysOnTop(true);
+        queryFrame.setVisible(true);
+    }
+
     private void buildAccessPanel() {
         JLabel userLabel = new JLabel("Inserisci username: ");
         JLabel passwordLabel = new JLabel("Inserisci password: ");
@@ -139,18 +170,33 @@ public class SwingView implements View{
     }
 
     private void buildMenuPanel() {
-        JPanel leftPanel = new JPanel(new BorderLayout());
-        JScrollPane scrollPane = new JScrollPane(this.output);
-        leftPanel.add(this.queriesComboBox, BorderLayout.NORTH);
-        leftPanel.add(scrollPane, BorderLayout.CENTER);
-        this.menuPanel.add(leftPanel, BorderLayout.WEST);
+        buildLeftPanel();
+        buildRightPanel();
+        this.frame.pack();
+    }
+
+    private void buildRightPanel() {
         JPanel rightPanel = new JPanel(new BorderLayout());
         this.buildViewPanel();
         rightPanel.add(this.viewPanel, BorderLayout.NORTH);
         this.buildInsertPanel();
         rightPanel.add(this.insertPanel, BorderLayout.CENTER);
         this.menuPanel.add(rightPanel, BorderLayout.EAST);
-        this.frame.pack();
+    }
+
+    private void buildLeftPanel() {
+        JPanel upperPanel = new JPanel();
+        JPanel leftPanel = new JPanel(new BorderLayout());
+        JButton goButton = new JButton("Go!");
+        goButton.addActionListener(
+            e -> this.controller.loadQueryValues((RestaurantQuery) this.queriesComboBox.getSelectedItem())
+        );
+        JScrollPane scrollPane = new JScrollPane(this.output);
+        upperPanel.add(this.queriesComboBox, BorderLayout.NORTH);
+        upperPanel.add(goButton);
+        leftPanel.add(upperPanel, BorderLayout.NORTH);
+        leftPanel.add(scrollPane, BorderLayout.CENTER);
+        this.menuPanel.add(leftPanel, BorderLayout.WEST);
     }
 
     private void buildViewPanel() {
