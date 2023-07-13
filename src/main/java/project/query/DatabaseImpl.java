@@ -433,5 +433,27 @@ public class DatabaseImpl implements Database {
             resultList.add(rowData);
         }
     }
+
+    @Override
+    public List<String> getColumnNames(String table) {
+        List<String> columnsList = new LinkedList<>();
+        String queryString;
+        PreparedStatement statement;
+        ResultSet resultSet;
+        queryString = "SELECT column_name " +
+            "FROM information_schema.columns " + 
+            "WHERE table_name = '" + table + "'";
+        try {
+            statement = connection.prepareStatement(queryString);
+            resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                columnsList.add(resultSet.getString(1));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return List.of();
+        }
+        return columnsList;
+    }
     
 }

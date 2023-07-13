@@ -17,4 +17,6 @@ public interface Database {
 
     Optional<List<List<String>>> runQuery(RestaurantQuery query, List<String> values);
 
+    List<String> getColumnNames(String table);
+
 }

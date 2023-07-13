@@ -55,5 +55,9 @@ public class Controller {
             this.view.viewTable(table.get().get(0), table.get().subList(1, table.get().size()));
         }
     }
+
+    public void loadColumnsNames(String table) {
+        this.view.setColumnsNames(this.database.getColumnNames(table));
+    }
     
 }

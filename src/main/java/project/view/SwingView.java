@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
+import java.awt.event.ItemEvent;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -41,7 +42,9 @@ public class SwingView implements View{
     private final JPanel insertPanel = new JPanel();
     private JComboBox<Object> tableNamesView;
     private JComboBox<Object> tableNamesInsert;
-    private List<JTextField> fieldList = new LinkedList<>();
+    private List<JLabelTextField> fieldList = new LinkedList<>();
+    private JButton clearButton = new JButton("Clear text fields");
+    private JPanel lowerInsertPanel = new JPanel();
 
     public SwingView(Controller controller) {
         this.controller = controller;
@@ -135,6 +138,23 @@ public class SwingView implements View{
         queryFrame.setVisible(true);
     }
 
+    @Override
+    public void setColumnsNames(List<String> columns) {
+        this.lowerInsertPanel.setLayout(new BoxLayout(lowerInsertPanel, BoxLayout.Y_AXIS));
+        this.lowerInsertPanel.removeAll();
+        this.fieldList.clear();
+        for (var column : columns) {
+            JLabelTextField tempPanel = new JLabelTextField(column);
+            this.fieldList.add(tempPanel);
+            lowerInsertPanel.add(tempPanel);
+        }
+        this.insertPanel.add(lowerInsertPanel);
+        this.insertPanel.remove(this.clearButton);
+        this.insertPanel.add(this.clearButton);
+        this.frame.repaint();
+        this.frame.pack();
+    }
+
     private void buildAccessPanel() {
         JLabel userLabel = new JLabel("Inserisci username: ");
         JLabel passwordLabel = new JLabel("Inserisci password: ");
@@ -195,28 +215,25 @@ public class SwingView implements View{
             e -> this.controller.loadTable(this.tableNamesView.getSelectedItem().toString())
         );
         this.viewPanel.add(viewButton);
-        this.viewPanel.add(tableNamesView);
+        this.viewPanel.add(this.tableNamesView);
     }
 
+
     private void buildInsertPanel() {
-        int numMaxFields = 10;
         JButton insertButton = new JButton("Insert");
         insertButton.addActionListener(e -> this.loadFields());
         var upperPanel = new JPanel();
+        this.tableNamesInsert.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                controller.loadColumnsNames(e.getItem().toString());
+            }
+        });
         upperPanel.add(insertButton);
         upperPanel.add(this.tableNamesInsert);
         this.insertPanel.setLayout(new BoxLayout(this.insertPanel, BoxLayout.Y_AXIS));
         this.insertPanel.add(upperPanel);
-        for (int i = 0; i < numMaxFields; i++) {
-            JLabel label = new JLabel("Field " + (i + 1));
-            this.fieldList.add(new JTextField(LENGTH_FIELD));
-            JPanel pairPanel = new JPanel();
-            pairPanel.add(label);
-            pairPanel.add(this.fieldList.get(i));
-            this.insertPanel.add(pairPanel);
-        }
-        JButton clearButton = new JButton("Clear text fields");
-        clearButton.addActionListener(e -> this.fieldList.forEach(f -> f.setText("")));
+        this.controller.loadColumnsNames(this.tableNamesInsert.getSelectedItem().toString());
+        clearButton.addActionListener(e -> this.fieldList.forEach(JLabelTextField::setTextFieldEmpty));
         this.insertPanel.add(clearButton);
         this.frame.pack();
     }
@@ -224,7 +241,7 @@ public class SwingView implements View{
     private void loadFields() {
         this.controller.insertInTable(
             this.fieldList.stream()
-                .map(JTextField::getText)
+                .map(JLabelTextField::getText)
                 .toList(), 
             this.tableNamesInsert.getSelectedItem().toString());
     }    
