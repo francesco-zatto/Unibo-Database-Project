@@ -1,5 +1,8 @@
 package project.db.api;
 
+/**
+ * Enum with the possible query to do on the database, except the ones to select every record of a table.
+ */
 public enum RestaurantQuery {
 
     INSERIRE_CONTO_A_PRENOTAZIONE_SALVATA("Inserire il conto a una prenotazione salvata"),
@@ -17,6 +20,9 @@ public enum RestaurantQuery {
         this.operation = operation;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String toString() {
         return this.operation;

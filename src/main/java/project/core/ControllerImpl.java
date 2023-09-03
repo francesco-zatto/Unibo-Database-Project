@@ -14,6 +14,9 @@ import project.query.Table;
 import project.view.SwingView;
 import project.view.View;
 
+/**
+ * Implementation of Controller that allows interactions between implementations of Database and of View.
+ */
 public class ControllerImpl implements Controller {
 
     private static final String DATABASE_NAME = "restaurant";
@@ -22,10 +25,16 @@ public class ControllerImpl implements Controller {
     private ConnectionProvider connectionProvider;
     private Optional<Connection> connection = Optional.empty();
 
+    /**
+     * Constructor that starts the view.
+     */
     public ControllerImpl() {
         this.view.start();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void tryAccess(final String username, final String password) {
         this.connectionProvider = new ConnectionProvider(username, password, DATABASE_NAME);
@@ -40,11 +49,17 @@ public class ControllerImpl implements Controller {
         this.view.startConnection();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void loadTableNames() {
         this.view.loadTableNames(this.database.getTableNames());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void loadTable(String name) {
         var table = this.database.getTable(name);
@@ -63,16 +78,25 @@ public class ControllerImpl implements Controller {
                 .toList();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void insertInTable(List<String> elements, String table) {
         this.view.printControlMessage(this.database.insertInTable(new RecordImpl(elements), table));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void loadQueryValues(RestaurantQuery query) {
         this.view.viewQueryValues(this.database.getQueryValues(query));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void runQuery(final RestaurantQuery query, final List<String> values) {
         var table = this.database.runQuery(query, values);
@@ -81,6 +105,9 @@ public class ControllerImpl implements Controller {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void loadColumnsNames(final String table) {
         this.view.setColumnsNames(this.database.getColumnNames(table));

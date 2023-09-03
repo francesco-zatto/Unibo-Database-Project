@@ -9,11 +9,13 @@ import java.util.Optional;
  * Expose a utility method to connect to a MySQL database 
  */
 public final class ConnectionProvider {
+
     private final String username;
     private final String password;
     private final String dbName;
 
     /**
+     * Constructor for a connection provider.
      * @param username the username used to connect to the database
      * @param password the password used to connect to the database
      * @param dbName the name of the database to connect to
@@ -25,6 +27,7 @@ public final class ConnectionProvider {
     }
 
     /**
+     * Method to try to get a connection with the MySQL database.
      * @return a Connection with the database specified in the class constructor
      * @throws IllegalStateException if the connection could not be establish
      */
