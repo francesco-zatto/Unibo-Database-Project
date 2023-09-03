@@ -15,7 +15,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
@@ -27,15 +26,13 @@ import project.db.api.RestaurantQuery;
 
 public class SwingView implements View{
 
+    public static final int LENGTH_FIELD = 20;
     private static final Dimension SCREEN_DIMENSION = Toolkit.getDefaultToolkit().getScreenSize();
-    private static final int LENGTH_FIELD = 20;
 
     private final Controller controller;
     private final JFrame frame = new JFrame("RESTAURANT DATABASE");
-    private final JPanel accessPanel = new JPanel(new BorderLayout());
+    private final AccessPanel accessPanel = new AccessPanel();
     private final JPanel menuPanel = new JPanel(new BorderLayout());
-    private final JTextField userText = new JTextField(LENGTH_FIELD);
-    private final JTextField passwordText = new JPasswordField(LENGTH_FIELD);
     private final JComboBox<RestaurantQuery> queriesComboBox = new JComboBox<>(RestaurantQuery.values());
     private final JTable output = new JTable(new DefaultTableModel());
     private final JPanel viewPanel = new JPanel();
@@ -49,7 +46,13 @@ public class SwingView implements View{
     public SwingView(Controller controller) {
         this.controller = controller;
         this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.buildAccessPanel();
+        this.accessPanel.buildAccessPanel(this::tryConnectionToDatabase);
+        this.frame.setContentPane(this.accessPanel);
+        this.frame.pack();
+    }
+
+    private void tryConnectionToDatabase(final ActionEvent e) {
+        this.controller.tryAccess(this.accessPanel.getUserText(), this.accessPanel.getPasswordText());
     }
 
     @Override
@@ -153,28 +156,6 @@ public class SwingView implements View{
         this.insertPanel.add(this.clearButton);
         this.frame.repaint();
         this.frame.pack();
-    }
-
-    private void buildAccessPanel() {
-        JLabel userLabel = new JLabel("Inserisci username: ");
-        JLabel passwordLabel = new JLabel("Inserisci password: ");
-        JButton loginButton = new JButton("Login");
-        var northPanel = new JPanel();
-        var centerPanel = new JPanel();
-        loginButton.addActionListener(this::tryConnectionToDatabase);
-        northPanel.add(userLabel);
-        northPanel.add(this.userText);
-        centerPanel.add(passwordLabel);
-        centerPanel.add(this.passwordText);
-        accessPanel.add(northPanel, BorderLayout.NORTH);
-        accessPanel.add(centerPanel, BorderLayout.CENTER);
-        accessPanel.add(loginButton, BorderLayout.SOUTH);
-        this.frame.setContentPane(this.accessPanel);
-        this.frame.pack();
-    }
-
-    private void tryConnectionToDatabase(final ActionEvent e) {
-        this.controller.tryAccess(this.userText.getText(), this.passwordText.getText());
     }
 
     private void buildMenuPanel() {

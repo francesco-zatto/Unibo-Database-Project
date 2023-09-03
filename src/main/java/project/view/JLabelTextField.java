@@ -6,13 +6,12 @@ import javax.swing.JTextField;
 
 public class JLabelTextField extends JPanel {
 
-    private static final int LENGTH_FIELD = 20;
     private final JLabel label;
     private final JTextField textField;
 
-    public JLabelTextField(String text) {
+    public JLabelTextField(final String text) {
         this.label = new JLabel(text);
-        this.textField = new JTextField(LENGTH_FIELD);
+        this.textField = new JTextField(SwingView.LENGTH_FIELD);
         this.add(label);
         this.add(textField);
     }
