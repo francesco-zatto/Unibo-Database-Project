@@ -8,6 +8,9 @@ bin/
 # Ignore Idea customizations
 .idea
 
+# Ignore sql files
+database_copy/
+
 # Ignore files by extension
 *.class
 *.DS_Store
