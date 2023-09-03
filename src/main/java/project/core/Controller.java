@@ -38,7 +38,13 @@ public class Controller {
 
     public void loadTable(String name) {
         var table = this.database.getTable(name);
-        this.view.viewTable(table.get(0), table.subList(1, table.size()));
+        viewTable(table);
+    }
+
+    private void viewTable(final List<List<String>> table) {
+        var columnsNames = table.get(0);
+        var tableResults = table.subList(1, table.size());
+        this.view.viewTable(columnsNames, tableResults);
     }
 
     public void insertInTable(List<String> elements, String table) {
@@ -49,14 +55,14 @@ public class Controller {
         this.view.viewQueryValues(this.database.getQueryValues(query));
     }
 
-    public void runQuery(RestaurantQuery query, List<String> values) {
+    public void runQuery(final RestaurantQuery query, final List<String> values) {
         var table = this.database.runQuery(query, values);
         if (table.isPresent()) {
-            this.view.viewTable(table.get().get(0), table.get().subList(1, table.get().size()));
+            viewTable(table.get());
         }
     }
 
-    public void loadColumnsNames(String table) {
+    public void loadColumnsNames(final String table) {
         this.view.setColumnsNames(this.database.getColumnNames(table));
     }
     
