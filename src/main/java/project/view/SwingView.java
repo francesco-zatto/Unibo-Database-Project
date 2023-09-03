@@ -25,10 +25,12 @@ import project.db.api.RestaurantQuery;
  */
 public class SwingView implements View{
 
+    public static final String TITLE = "RESTAURANT DATABASE";
+    public static final int CONSTANT_POSITION = 4;
     public static final int LENGTH_FIELD = 20;
     private static final Dimension SCREEN_DIMENSION = Toolkit.getDefaultToolkit().getScreenSize();
     private final Controller controller;
-    private final JFrame frame = new JFrame("RESTAURANT DATABASE");
+    private final JFrame frame = new JFrame(TITLE);
     private final AccessPanel accessPanel = new AccessPanel();
     private final JPanel menuPanel = new JPanel(new BorderLayout());
     private final JComboBox<RestaurantQuery> queriesComboBox = new JComboBox<>(RestaurantQuery.values());
@@ -57,8 +59,16 @@ public class SwingView implements View{
      */
     @Override
     public void start() {
-        this.frame.setLocation((int)(SCREEN_DIMENSION.getWidth() / 4), (int)(SCREEN_DIMENSION.getHeight() / 4));
+        this.frame.setLocation(getXLocation(), getYLocation());
         this.frame.setVisible(true);
+    }
+
+    private int getXLocation() {
+        return (int)(SCREEN_DIMENSION.getWidth() / CONSTANT_POSITION);
+    }
+
+    private int getYLocation() {
+        return (int)(SCREEN_DIMENSION.getHeight() / CONSTANT_POSITION);
     }
 
     /**
@@ -72,93 +82,6 @@ public class SwingView implements View{
         this.frame.setContentPane(this.menuPanel);
         this.frame.pack();
         this.frame.repaint();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void loadTableNames(List<String> names) {
-        this.viewPanel.setTableNames(names);
-        this.insertPanel.setTableNames(names);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void viewTable(List<String> columns, List<List<String>> results) {
-        var allResultsArray = getAllResultsArray(columns, results);
-        TableModel tableModel = new DefaultTableModel(allResultsArray, columns.toArray());
-        updateOutputTable(tableModel);
-    }
-
-    private Object[][] getAllResultsArray(List<String> columns, List<List<String>> results) {
-        int numRows = results.size();
-        int numColumns = columns.size();
-        Object[][] allResultsArray = new Object[numRows][numColumns];
-        for (int i = 0; i < numRows; i++) {
-            allResultsArray[i] = results.get(i).toArray();
-        }
-        return allResultsArray;
-    }
-
-    private void updateOutputTable(TableModel tableModel) {
-        this.outputTable.setModel(tableModel);
-        this.outputTable.setEnabled(false);
-        this.outputTable.sizeColumnsToFit(-1);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void printControlMessage(boolean insertCorrect) {
-        if (insertCorrect) {
-            showWrongInsertPane();
-        } else {
-            showCorrectInsertPane();
-        }
-    }
-
-    private void showWrongInsertPane() {
-        String correctMessage = "Inserimento andato a buon fine!";
-        String ok = "OK!";
-        showMessageAfterInsert(correctMessage, ok, JOptionPane.PLAIN_MESSAGE);
-    }
-
-    private void showCorrectInsertPane() {
-        String wrongMessage = "Inserimento errato!";
-        String danger = "!";
-        showMessageAfterInsert(wrongMessage, danger, JOptionPane.WARNING_MESSAGE);
-    }
-
-    private void showMessageAfterInsert(String mainMessage, String secondMessage, int paneType) {
-        JOptionPane.showMessageDialog(this.frame, mainMessage, secondMessage, paneType);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void viewQueryValues(List<String> values) {
-        QueryFrame queryFrame = new QueryFrame(SCREEN_DIMENSION, values);
-        var query = (RestaurantQuery) this.queriesComboBox.getSelectedItem();
-        queryFrame.addRunQueryButton(e -> this.runQuery(query, queryFrame.getInsertedValues()));
-    }
-
-    private void runQuery(RestaurantQuery query, List<String> insertedValues) {
-        this.controller.runQuery(query, insertedValues);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setColumnsNames(List<String> columns) {
-        this.insertPanel.updateLowerPanel(columns);
-        this.frame.repaint();
-        this.frame.pack();
     }
 
     private void buildMenuPanel() {
@@ -213,6 +136,93 @@ public class SwingView implements View{
         if (e.getStateChange() == ItemEvent.SELECTED) {
             controller.loadColumnsNames(e.getItem().toString());
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void loadTableNames(List<String> names) {
+        this.viewPanel.setTableNames(names);
+        this.insertPanel.setTableNames(names);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void viewTable(List<String> columns, List<List<String>> results) {
+        var allResultsArray = getAllResultsArray(columns, results);
+        TableModel tableModel = new DefaultTableModel(allResultsArray, columns.toArray());
+        updateOutputTable(tableModel);
+    }
+
+    private Object[][] getAllResultsArray(List<String> columns, List<List<String>> results) {
+        int numRows = results.size();
+        int numColumns = columns.size();
+        Object[][] allResultsArray = new Object[numRows][numColumns];
+        for (int i = 0; i < numRows; i++) {
+            allResultsArray[i] = results.get(i).toArray();
+        }
+        return allResultsArray;
+    }
+
+    private void updateOutputTable(TableModel tableModel) {
+        this.outputTable.setModel(tableModel);
+        this.outputTable.setEnabled(false);
+        this.outputTable.sizeColumnsToFit(-1);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void printControlMessage(boolean insertCorrect) {
+        if (insertCorrect) {
+            showCorrectInsertPane();
+        } else {
+            showWrongInsertPane();
+        }
+    }
+
+    private void showCorrectInsertPane() {
+        String correctMessage = "Inserimento andato a buon fine!";
+        String ok = "OK!";
+        showMessageAfterInsert(correctMessage, ok, JOptionPane.PLAIN_MESSAGE);
+    }
+
+    private void showWrongInsertPane() {
+        String wrongMessage = "Inserimento errato!";
+        String danger = "!";
+        showMessageAfterInsert(wrongMessage, danger, JOptionPane.WARNING_MESSAGE);
+    }
+
+    private void showMessageAfterInsert(String mainMessage, String secondMessage, int paneType) {
+        JOptionPane.showMessageDialog(this.frame, mainMessage, secondMessage, paneType);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void viewQueryValues(List<String> values) {
+        QueryFrame queryFrame = new QueryFrame(SCREEN_DIMENSION, values);
+        var query = (RestaurantQuery) this.queriesComboBox.getSelectedItem();
+        queryFrame.addRunQueryButton(e -> this.runQuery(query, queryFrame.getInsertedValues()));
+    }
+
+    private void runQuery(RestaurantQuery query, List<String> insertedValues) {
+        this.controller.runQuery(query, insertedValues);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setColumnsNames(List<String> columns) {
+        this.insertPanel.updateLowerPanel(columns);
+        this.frame.repaint();
+        this.frame.pack();
     }
 
 }
