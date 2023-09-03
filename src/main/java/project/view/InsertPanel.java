@@ -10,6 +10,9 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 
+/**
+ * Panel where it is possible to insert records, selecting the table and inserting correctly values.
+ */
 public class InsertPanel extends JPanel {
 
     private static final String INSERT_TEXT = "Insert";
@@ -19,15 +22,20 @@ public class InsertPanel extends JPanel {
     private JComboBox<Object> tableNames = new JComboBox<>();
     private JButton clearButton;
 
+    /**
+     * Constructor for an InsertPanel.
+     */
     public InsertPanel() {
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         this.lowerPanel.setLayout(new BoxLayout(this.lowerPanel, BoxLayout.Y_AXIS));
     }
 
-    public void buildInsertPanel(
-        ActionListener buttonListener,
-        ItemListener namesListener
-    ) {
+    /**
+     * Method to build correctly the insertPanel.
+     * @param buttonListener the action performed by the button to try inserting values
+     * @param namesListener the action performed when the name of the button changes
+     */
+    public void buildInsertPanel(ActionListener buttonListener, ItemListener namesListener) {
         var insertButton = createInsertButton(buttonListener);
         var upperPanel = createUpperPanel(insertButton);
         this.add(upperPanel);
@@ -56,14 +64,26 @@ public class InsertPanel extends JPanel {
         return panel;
     } 
 
+    /**
+     * Setter for the names of the tables.
+     * @param names every tables' name
+     */
     public void setTableNames(List<String> names) {
         this.tableNames = new JComboBox<>(names.toArray());
     }
 
+    /**
+     * Getter for the name of the selected item, i.e. the table's name.
+     * @return the table's name
+     */
     public String getSelectedItemAsString() {
         return this.tableNames.getSelectedItem().toString();
     } 
 
+    /**
+     * Getter for the text inserted by the user in the fields.
+     * @return a list of the values inserted
+     */
     public List<String> getInsertedText() {
         return this.fieldList.stream()
                 .map(JLabelTextField::getText)

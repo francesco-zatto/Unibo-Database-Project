@@ -6,6 +6,9 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
+/**
+ * The first panel showed to the user, where it is possible to insert username and password.
+ */
 public class AccessPanel extends JPanel {
 
     private static final String USER_TEXT = "Inserisci username: ";
@@ -14,10 +17,17 @@ public class AccessPanel extends JPanel {
     private final JLabelTextField userField = new JLabelTextField(USER_TEXT);
     private final JLabelTextField passwordField = new JLabelTextField(PASSWORD_TEXT);
 
+    /**
+     * Constructor for an AccessPanel.
+     */
     public AccessPanel() {
         this.setLayout(new BorderLayout());
     }
 
+    /**
+     * Method to build the access panel correctly, otherwise it will be empty.
+     * @param loginAction the action performed when the button is clicked
+     */
     public void buildAccessPanel(ActionListener loginAction) {
         JButton loginButton = createLoginButton(loginAction);
         var northPanel = createPanelWithField(this.userField);
@@ -43,10 +53,18 @@ public class AccessPanel extends JPanel {
         this.add(loginButton, BorderLayout.SOUTH);
     }
 
+    /**
+     * Getter for the username.
+     * @return the username
+     */
     public String getUserText() {
         return this.userField.getText();
     }
 
+    /**
+     * Getter for the password.
+     * @return the password
+     */
     public String getPasswordText() {
         return this.passwordField.getText();
     }

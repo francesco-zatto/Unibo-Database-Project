@@ -9,6 +9,11 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+/**
+ * Class to create a frame where it is possible to insert values to run an already selected query.
+ * The purpose of this class is not to choose the right query, but given the chosen query this class 
+ * allow the user to insert values and get them to run the query.
+ */
 public class QueryFrame {
 
     private static final String TITLE = "Inserire correttamente i dati";
@@ -18,6 +23,11 @@ public class QueryFrame {
     private final JPanel queryPanel = new JPanel();
     private final List<JLabelTextField> valuesList = new LinkedList<>();
 
+    /**
+     * Constructor for a query frame. 
+     * @param screenDimension dimension of the screen where the frame is
+     * @param values values of the table's fields 
+     */
     public QueryFrame(Dimension screenDimension, List<String> values) {
         this.frame.setLocation(getFrameWidth(screenDimension), getFrameHeigth(screenDimension));
         fillValues(values);
@@ -45,6 +55,10 @@ public class QueryFrame {
         this.queryPanel.add(valueField);
     }
 
+    /**
+     * Method to add the button to run the query. It must be added, otherwise it is impossible to run it.
+     * @param runQuery the action performed when the button is clicked
+     */
     public void addRunQueryButton(ActionListener runQuery) {
         JButton runQueryButton = createRunQueryButton(runQuery);
         this.queryPanel.add(runQueryButton);
@@ -57,6 +71,11 @@ public class QueryFrame {
         return button;
     }
 
+    /**
+     * The frame has some fields to fill with the correct values to run the query.
+     * Using this method it is possible to get the text inside those fields.
+     * @return inserted values to run the query
+     */
     public List<String> getInsertedValues() {
         return this.valuesList.stream()
                 .map(JLabelTextField::getText)

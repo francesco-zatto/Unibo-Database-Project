@@ -20,11 +20,13 @@ import javax.swing.table.TableModel;
 import project.core.Controller;
 import project.db.api.RestaurantQuery;
 
+/**
+ * Class that implements View using JSwing framework for the GUI.
+ */
 public class SwingView implements View{
 
     public static final int LENGTH_FIELD = 20;
     private static final Dimension SCREEN_DIMENSION = Toolkit.getDefaultToolkit().getScreenSize();
-
     private final Controller controller;
     private final JFrame frame = new JFrame("RESTAURANT DATABASE");
     private final AccessPanel accessPanel = new AccessPanel();
@@ -34,6 +36,10 @@ public class SwingView implements View{
     private final ViewPanel viewPanel = new ViewPanel();
     private final InsertPanel insertPanel = new InsertPanel();
 
+    /**
+     * Constructor for a SwingView with the controller of the application.
+     * @param controller app's controller that allows any interaction with the database
+     */
     public SwingView(Controller controller) {
         this.controller = controller;
         this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -46,12 +52,18 @@ public class SwingView implements View{
         this.controller.tryAccess(this.accessPanel.getUserText(), this.accessPanel.getPasswordText());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void start() {
         this.frame.setLocation((int)(SCREEN_DIMENSION.getWidth() / 4), (int)(SCREEN_DIMENSION.getHeight() / 4));
         this.frame.setVisible(true);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void startConnection() {
         this.frame.remove(this.accessPanel);
@@ -62,12 +74,18 @@ public class SwingView implements View{
         this.frame.repaint();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void loadTableNames(List<String> names) {
         this.viewPanel.setTableNames(names);
         this.insertPanel.setTableNames(names);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void viewTable(List<String> columns, List<List<String>> results) {
         var allResultsArray = getAllResultsArray(columns, results);
@@ -91,6 +109,9 @@ public class SwingView implements View{
         this.outputTable.sizeColumnsToFit(-1);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void printControlMessage(boolean insertCorrect) {
         if (insertCorrect) {
@@ -116,6 +137,9 @@ public class SwingView implements View{
         JOptionPane.showMessageDialog(this.frame, mainMessage, secondMessage, paneType);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void viewQueryValues(List<String> values) {
         QueryFrame queryFrame = new QueryFrame(SCREEN_DIMENSION, values);
@@ -127,6 +151,9 @@ public class SwingView implements View{
         this.controller.runQuery(query, insertedValues);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void setColumnsNames(List<String> columns) {
         this.insertPanel.updateLowerPanel(columns);
