@@ -15,16 +15,26 @@ import java.util.Optional;
 import project.db.api.RestaurantQuery;
 import project.tableFactory.StaticTableFactory;
 
+/**
+ * Basic implementation of Database to connect with a real database using JDBC.
+ */
 public class DatabaseImpl implements Database {
 
     private static final String NULL_VALUE = "NULL";
 
     private final Connection connection;
 
+    /**
+     * Constructor with the database's connection
+     * @param connection database's connection
+     */
     public DatabaseImpl(Connection connection) {
         this.connection = connection;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<String> getTableNames() {
         List<String> list = new LinkedList<>();
@@ -42,6 +52,9 @@ public class DatabaseImpl implements Database {
         return list;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Table getTable(String tableName) {
         List<String> columns = new LinkedList<>();
@@ -83,6 +96,9 @@ public class DatabaseImpl implements Database {
         );
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean insertInTable(Record record, String table) {
         List<String> elementsWithNulls = record.getElements().stream()
@@ -106,6 +122,9 @@ public class DatabaseImpl implements Database {
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<String> getQueryValues(RestaurantQuery query) {
         switch (query) {
@@ -129,6 +148,9 @@ public class DatabaseImpl implements Database {
         return List.of();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Optional<Table> runQuery(RestaurantQuery query, List<String> values) {
         List<List<String>> resultList = new LinkedList<>();
@@ -447,6 +469,10 @@ public class DatabaseImpl implements Database {
         }
     }
 
+    
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<String> getColumnNames(String tableName) {
         List<String> columnsList = new LinkedList<>();
