@@ -4,7 +4,7 @@ import java.util.List;
 
 public interface View {
 
-    void startGUI();
+    void start();
 
     void startConnection();
 

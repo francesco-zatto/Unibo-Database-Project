@@ -35,12 +35,11 @@ public class SwingView implements View{
     private final JPanel menuPanel = new JPanel(new BorderLayout());
     private final JComboBox<RestaurantQuery> queriesComboBox = new JComboBox<>(RestaurantQuery.values());
     private final JTable output = new JTable(new DefaultTableModel());
-    private final JPanel viewPanel = new JPanel();
-    private final JPanel insertPanel = new JPanel();
-    private JComboBox<Object> tableNamesView;
+    private final ViewPanel viewPanel = new ViewPanel();
+    private final InsertPanel insertPanel = new InsertPanel();
     private JComboBox<Object> tableNamesInsert;
     private List<JLabelTextField> fieldList = new LinkedList<>();
-    private JButton clearButton = new JButton("Clear text fields");
+    //private JButton clearButton = new JButton("Clear text fields");
     private JPanel lowerInsertPanel = new JPanel();
 
     public SwingView(Controller controller) {
@@ -56,7 +55,7 @@ public class SwingView implements View{
     }
 
     @Override
-    public void startGUI() {
+    public void start() {
         this.frame.setLocation((int)(SCREEN_DIMENSION.getWidth() / 4), (int)(SCREEN_DIMENSION.getHeight() / 4));
         this.frame.setVisible(true);
     }
@@ -73,8 +72,8 @@ public class SwingView implements View{
 
     @Override
     public void loadTableNames(List<String> names) {
-        this.tableNamesView = new JComboBox<>(names.toArray());
-        this.tableNamesInsert = new JComboBox<>(names.toArray());
+        this.viewPanel.setTableNames(names);
+        this.insertPanel.setTableNames(names);
     }
 
     @Override
@@ -152,8 +151,9 @@ public class SwingView implements View{
             lowerInsertPanel.add(tempPanel);
         }
         this.insertPanel.add(lowerInsertPanel);
-        this.insertPanel.remove(this.clearButton);
-        this.insertPanel.add(this.clearButton);
+        this.insertPanel.updateClearButton();
+        /*TODO this.insertPanel.remove(this.clearButton);
+        this.insertPanel.add(this.clearButton);*/
         this.frame.repaint();
         this.frame.pack();
     }
@@ -166,11 +166,27 @@ public class SwingView implements View{
 
     private void buildRightPanel() {
         JPanel rightPanel = new JPanel(new BorderLayout());
-        this.buildViewPanel();
+        this.viewPanel.buildViewPanel(this::loadTable);
         rightPanel.add(this.viewPanel, BorderLayout.NORTH);
-        this.buildInsertPanel();
+        this.insertPanel.buildInsertPanel(
+            e -> this.loadFields(),
+            e -> this.fieldList.forEach(JLabelTextField::setTextFieldEmpty),
+            e -> checkNameSelection(e)
+        );
+        this.controller.loadColumnsNames(this.insertPanel.getSelectedItemAsString());
+        this.frame.pack();
         rightPanel.add(this.insertPanel, BorderLayout.CENTER);
         this.menuPanel.add(rightPanel, BorderLayout.EAST);
+    }
+
+    private void checkNameSelection(ItemEvent e) {
+        if (e.getStateChange() == ItemEvent.SELECTED) {
+            controller.loadColumnsNames(e.getItem().toString());
+        }
+    }
+
+    private void loadTable(ActionEvent e) {
+        this.controller.loadTable(this.viewPanel.getSelectedItemAsString());
     }
 
     private void buildLeftPanel() {
@@ -186,35 +202,6 @@ public class SwingView implements View{
         leftPanel.add(upperPanel, BorderLayout.NORTH);
         leftPanel.add(scrollPane, BorderLayout.CENTER);
         this.menuPanel.add(leftPanel, BorderLayout.WEST);
-    }
-
-    private void buildViewPanel() {
-        JButton viewButton = new JButton("View");
-        viewButton.addActionListener(
-            e -> this.controller.loadTable(this.tableNamesView.getSelectedItem().toString())
-        );
-        this.viewPanel.add(viewButton);
-        this.viewPanel.add(this.tableNamesView);
-    }
-
-
-    private void buildInsertPanel() {
-        JButton insertButton = new JButton("Insert");
-        insertButton.addActionListener(e -> this.loadFields());
-        var upperPanel = new JPanel();
-        this.tableNamesInsert.addItemListener(e -> {
-            if (e.getStateChange() == ItemEvent.SELECTED) {
-                controller.loadColumnsNames(e.getItem().toString());
-            }
-        });
-        upperPanel.add(insertButton);
-        upperPanel.add(this.tableNamesInsert);
-        this.insertPanel.setLayout(new BoxLayout(this.insertPanel, BoxLayout.Y_AXIS));
-        this.insertPanel.add(upperPanel);
-        this.controller.loadColumnsNames(this.tableNamesInsert.getSelectedItem().toString());
-        clearButton.addActionListener(e -> this.fieldList.forEach(JLabelTextField::setTextFieldEmpty));
-        this.insertPanel.add(clearButton);
-        this.frame.pack();
     }
 
     private void loadFields() {

@@ -23,7 +23,7 @@ public class ControllerImpl implements Controller {
     private Optional<Connection> connection = Optional.empty();
 
     public ControllerImpl() {
-        this.view.startGUI();
+        this.view.start();
     }
 
     @Override
