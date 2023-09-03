@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 import project.db.api.RestaurantQuery;
+import project.tableFactory.StaticTableFactory;
 
 public class DatabaseImpl implements Database {
 
@@ -42,7 +43,7 @@ public class DatabaseImpl implements Database {
     }
 
     @Override
-    public List<List<String>> getTable(String tableName) {
+    public Table getTable(String tableName) {
         List<String> columns = new LinkedList<>();
         List<List<String>> list = new LinkedList<>();
         String query = "SELECT * FROM " + tableName;
@@ -69,14 +70,22 @@ public class DatabaseImpl implements Database {
                 list.add(rowData);
             }
         } catch (SQLException e) {
-            return List.of();
+            return StaticTableFactory.getEmptyTable();
         }
-        return list;
+        return getTableFromLists(list);
+    }
+
+    private Table getTableFromLists(List<List<String>> list) {
+        return StaticTableFactory.createTable(
+            list.stream()
+                .map(RecordImpl::new)
+                .toList()
+        );
     }
 
     @Override
-    public boolean insertInTable(List<String> elements, String table) {
-        List<String> elementsWithNulls = elements.stream()
+    public boolean insertInTable(Record record, String table) {
+        List<String> elementsWithNulls = record.getElements().stream()
             .map(e -> {
                 if (e.isBlank()) return (String)(null);
                 return e;
@@ -121,7 +130,7 @@ public class DatabaseImpl implements Database {
     }
 
     @Override
-    public Optional<List<List<String>>> runQuery(RestaurantQuery query, List<String> values) {
+    public Optional<Table> runQuery(RestaurantQuery query, List<String> values) {
         List<List<String>> resultList = new LinkedList<>();
         try {
             switch (query) {
@@ -153,10 +162,14 @@ public class DatabaseImpl implements Database {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return Optional.of(resultList).flatMap(l -> {
-            if (l.isEmpty()) return Optional.empty();
-            return Optional.of(l);
-        });        
+        return getTableFromResultList(resultList);        
+    }
+
+    private Optional<Table> getTableFromResultList(final List<List<String>> resultList) {
+        if (resultList.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(getTableFromLists(resultList));
     }
 
     private List<Integer> findTableTypes(String table) {
@@ -435,14 +448,14 @@ public class DatabaseImpl implements Database {
     }
 
     @Override
-    public List<String> getColumnNames(String table) {
+    public List<String> getColumnNames(String tableName) {
         List<String> columnsList = new LinkedList<>();
         String queryString;
         PreparedStatement statement;
         ResultSet resultSet;
         queryString = "SELECT column_name " +
             "FROM information_schema.columns " + 
-            "WHERE table_name = '" + table + "'";
+            "WHERE table_name = '" + tableName + "'";
         try {
             statement = connection.prepareStatement(queryString);
             resultSet = statement.executeQuery();

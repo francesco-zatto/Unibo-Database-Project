@@ -8,6 +8,9 @@ import project.db.api.ConnectionProvider;
 import project.db.api.RestaurantQuery;
 import project.query.Database;
 import project.query.DatabaseImpl;
+import project.query.Record;
+import project.query.RecordImpl;
+import project.query.Table;
 import project.view.SwingView;
 import project.view.View;
 
@@ -48,15 +51,21 @@ public class ControllerImpl implements Controller {
         viewTable(table);
     }
 
-    private void viewTable(final List<List<String>> table) {
-        var columnsNames = table.get(0);
-        var tableResults = table.subList(1, table.size());
-        this.view.viewTable(columnsNames, tableResults);
+    private void viewTable(final Table table) {
+        var columnsList = table.getColumnsAsList();
+        var tableRecords = mapFromRecordsToLists(table);
+        this.view.viewTable(columnsList, tableRecords);
+    }
+
+    private List<List<String>> mapFromRecordsToLists(final Table table) {
+        return table.getRecords().stream()
+                .map(Record::getElements)
+                .toList();
     }
 
     @Override
     public void insertInTable(List<String> elements, String table) {
-        this.view.printControlMessage(this.database.insertInTable(elements, table));
+        this.view.printControlMessage(this.database.insertInTable(new RecordImpl(elements), table));
     }
 
     @Override

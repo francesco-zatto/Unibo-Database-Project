@@ -9,14 +9,14 @@ public interface Database {
 
     List<String> getTableNames();
 
-    List<List<String>> getTable(String tableName);
+    Table getTable(String tableName);
 
-    boolean insertInTable(List<String> elements, String table);
+    boolean insertInTable(Record record, String table);
 
     List<String> getQueryValues(RestaurantQuery query);
 
-    Optional<List<List<String>>> runQuery(RestaurantQuery query, List<String> values);
+    Optional<Table> runQuery(RestaurantQuery query, List<String> values);
 
-    List<String> getColumnNames(String table);
+    List<String> getColumnNames(String tableName);
 
 }
