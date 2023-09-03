@@ -1,69 +1,23 @@
 package project.core;
 
-import java.sql.Connection;
 import java.util.List;
-import java.util.Optional;
 
-import project.db.api.ConnectionProvider;
 import project.db.api.RestaurantQuery;
-import project.query.Database;
-import project.query.DatabaseImpl;
-import project.view.SwingView;
-import project.view.View;
 
-public class Controller {
+public interface Controller {
 
-    private static final String DATABASE_NAME = "restaurant";
-    private final View view = new SwingView(this);
-    private Database database;
-    private ConnectionProvider connectionProvider;
-    private Optional<Connection> connection = Optional.empty();
+    void tryAccess(String username, String password);
 
-    public Controller() {
-        this.view.startGUI();
-    }
+    void loadTableNames();
 
-    public boolean tryAccess(String username, String password) {
-        this.connectionProvider = new ConnectionProvider(username, password, DATABASE_NAME);
-        this.connection = this.connectionProvider.getMySQLConnection();
-        if (this.connection.isPresent()) {
-            this.database = new DatabaseImpl(this.connection.get());
-        }
-        return this.connection.isPresent();
-    }
+    void loadTable(String name);
 
-    public void loadTableNames() {
-        this.view.loadTableNames(this.database.getTableNames());
-    }
+    void insertInTable(List<String> elements, String table);
 
-    public void loadTable(String name) {
-        var table = this.database.getTable(name);
-        viewTable(table);
-    }
+    void loadQueryValues(RestaurantQuery query);
 
-    private void viewTable(final List<List<String>> table) {
-        var columnsNames = table.get(0);
-        var tableResults = table.subList(1, table.size());
-        this.view.viewTable(columnsNames, tableResults);
-    }
+    void runQuery(RestaurantQuery query, List<String> values);
 
-    public void insertInTable(List<String> elements, String table) {
-        this.view.printControlMessage(this.database.insertInTable(elements, table));
-    }
+    void loadColumnsNames(String table);
 
-    public void loadQueryValues(RestaurantQuery query) {
-        this.view.viewQueryValues(this.database.getQueryValues(query));
-    }
-
-    public void runQuery(final RestaurantQuery query, final List<String> values) {
-        var table = this.database.runQuery(query, values);
-        if (table.isPresent()) {
-            viewTable(table.get());
-        }
-    }
-
-    public void loadColumnsNames(final String table) {
-        this.view.setColumnsNames(this.database.getColumnNames(table));
-    }
-    
 }

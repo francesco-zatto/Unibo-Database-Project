@@ -173,10 +173,8 @@ public class SwingView implements View{
         this.frame.pack();
     }
 
-    private void tryConnectionToDatabase(ActionEvent e) {
-        if (this.controller.tryAccess(this.userText.getText(), this.passwordText.getText())) {
-            this.startConnection();
-        }
+    private void tryConnectionToDatabase(final ActionEvent e) {
+        this.controller.tryAccess(this.userText.getText(), this.passwordText.getText());
     }
 
     private void buildMenuPanel() {

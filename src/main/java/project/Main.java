@@ -1,13 +1,13 @@
 package project;
 
-import project.core.Controller;
+import project.core.ControllerImpl;
 
 public class Main {
     
     private Main(){}
 
     public static void main(String[] args) {
-        new Controller();
+        new ControllerImpl();
     }
 
 }
