@@ -2,6 +2,7 @@ package project.view;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ItemListener;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.BoxLayout;
@@ -13,22 +14,25 @@ public class InsertPanel extends JPanel {
 
     private static final String INSERT_TEXT = "Insert";
     private static final String CLEAR_TEXT = "Clear text fields";
+    private final JPanel lowerPanel = new JPanel();
+    private final List<JLabelTextField> fieldList = new LinkedList<>();
     private JComboBox<Object> tableNames = new JComboBox<>();
     private JButton clearButton;
 
     public InsertPanel() {
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        this.lowerPanel.setLayout(new BoxLayout(this.lowerPanel, BoxLayout.Y_AXIS));
     }
 
     public void buildInsertPanel(
-        ActionListener buttonListener, 
-        ActionListener clearListener, 
+        ActionListener buttonListener,
         ItemListener namesListener
     ) {
         var insertButton = createInsertButton(buttonListener);
         var upperPanel = createUpperPanel(insertButton);
         this.add(upperPanel);
         this.tableNames.addItemListener(namesListener);
+        ActionListener clearListener = e -> this.fieldList.forEach(JLabelTextField::setTextFieldEmpty);
         this.clearButton = createClearButton(clearListener);
         this.add(clearButton);
     }
@@ -60,7 +64,29 @@ public class InsertPanel extends JPanel {
         return this.tableNames.getSelectedItem().toString();
     } 
 
-    public void updateClearButton() {
+    public List<String> getInsertedText() {
+        return this.fieldList.stream()
+                .map(JLabelTextField::getText)
+                .toList();
+    }
+
+    public void updateLowerPanel(List<String> columns) {
+        this.lowerPanel.removeAll();
+        this.fieldList.clear();
+        for (var column : columns) {
+            addPanelBy(column);
+        }
+        this.add(lowerPanel);
+        this.updateClearButton();
+    }
+
+    private void addPanelBy(String column) {
+        JLabelTextField tempPanel = new JLabelTextField(column);
+        this.fieldList.add(tempPanel);
+        this.lowerPanel.add(tempPanel);
+    }
+
+    private void updateClearButton() {
         this.remove(this.clearButton);
         this.add(this.clearButton);
     }
