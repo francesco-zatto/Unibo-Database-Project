@@ -7,10 +7,11 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 import project.db.api.RestaurantQuery;
 import project.db.api.utilities.InsertSelectQueryTexts;
@@ -21,8 +22,6 @@ import project.tableFactory.StaticTableFactory;
  * Basic implementation of Database to connect with a real database using JDBC.
  */
 public class DatabaseImpl implements Database {
-
-    private static final String NULL_VALUE = "NULL";
 
     private final Connection connection;
     private Statement statement;
@@ -74,68 +73,63 @@ public class DatabaseImpl implements Database {
      */
     @Override
     public Table getTable(String tableName) {
-        List<String> columns = new LinkedList<>();
-        List<List<String>> list = new LinkedList<>();
+        Table table = StaticTableFactory.getEmptyTable();
         String query = InsertSelectQueryTexts.getSelectEveryRecordFromTable(tableName);
-        ResultSet resultSet;
         try {
-            Statement statement = connection.createStatement();
-            resultSet = statement.executeQuery(query);
-            ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
-            int columnCount = resultSetMetaData.getColumnCount();
-            for (int i = 1; i <= columnCount; i++) {
-                columns.add(resultSetMetaData.getColumnName(i));
-            }
-            list.add(columns);
-            while (resultSet.next()) {
-                List<String> rowData = new LinkedList<>();
-                for (int i = 1; i <= columnCount; i++) {
-                    Optional<Object> currentElement = Optional.ofNullable(resultSet.getObject(i));
-                    if (currentElement.isEmpty()) {
-                        rowData.add(NULL_VALUE);
-                    } else {
-                        rowData.add(currentElement.get().toString());
-                    }
-                }
-                list.add(rowData);
-            }
+            table = getEveryRecordFromTable(query, tableName);
         } catch (SQLException e) {
-            return StaticTableFactory.getEmptyTable();
+            return table;
         }
-        return getTableFromLists(list);
+        return table;
     }
 
-    private List<List<String>> getEveryRecordFromTable(String query, String tableName) throws SQLException {
-        /*Statement statement = connection.createStatement();
-        ResultSet resultSet = statement.executeQuery(query);
-        ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
-        int columnCount = resultSetMetaData.getColumnCount();
-        List<String> columnsNames = getColumnNames(tableName)
-        for (int i = 1; i <= columnCount; i++) {
-            columns.add(resultSetMetaData.getColumnName(i));
-        }
-        list.add(columns);
-        while (resultSet.next()) {
-            List<String> rowData = new LinkedList<>();
-            for (int i = 1; i <= columnCount; i++) {
-                Optional<Object> currentElement = Optional.ofNullable(resultSet.getObject(i));
-                if (currentElement.isEmpty()) {
-                    rowData.add(NULL_VALUE);
-                } else {
-                    rowData.add(currentElement.get().toString());
-                }
+    private Table getEveryRecordFromTable(String query, String tableName) throws SQLException {
+        startQueryExecution(query);
+        List<String> columnsNames = getColumnNamesFromMetaData(this.resultSet.getMetaData());
+        List<Record> recordsList = new LinkedList<>();
+        recordsList.add(new RecordImpl(columnsNames));
+        recordsList.addAll(getRecordsListFromResultSet());
+        return StaticTableFactory.createTable(recordsList);
+    }
+
+    private List<String> getColumnNamesFromMetaData(ResultSetMetaData metaData) throws SQLException{
+        int columnCount = metaData.getColumnCount();
+        return Stream.iterate(1, i -> i <= columnCount, i -> i + 1)
+                .map(mapperToColumnName(metaData))
+                .toList();
+    }
+
+    private Function<Integer, String> mapperToColumnName(ResultSetMetaData metaData) {
+        return i -> {
+            try {
+                return metaData.getColumnName(i);
+            } catch (SQLException e) {
+                return MetaDataQueries.EMPTY_VALUE;
             }
-            list.add(rowData);
-        }*/
-        return null;
+        };
     }
 
-    private Table getTableFromLists(List<List<String>> list) {
-        return StaticTableFactory.createTable(
-            list.stream()
-                .map(RecordImpl::new)
-                .toList()
-        );
+    private List<Record> getRecordsListFromResultSet() throws SQLException {
+        List<Record> recordList = new LinkedList<>();
+        while (this.resultSet.next()) {
+            recordList.add(getCurrentRecord());
+        }
+        return recordList;
+    }
+
+    private Record getCurrentRecord() throws SQLException {
+        int columnCount = this.resultSet.getMetaData().getColumnCount();
+        List<String> record = new LinkedList<>();
+        for (int i = 1; i <= columnCount; i++) {
+            record.add(getCurrentElementToString(i));
+        }
+        return new RecordImpl(record);
+    }
+
+    private String getCurrentElementToString(int i) throws SQLException {
+        return Optional.ofNullable(this.resultSet.getObject(i))
+                .map(Object::toString)
+                .orElse(MetaDataQueries.NULL_VALUE);
     }
 
     /**
@@ -143,27 +137,53 @@ public class DatabaseImpl implements Database {
      */
     @Override
     public boolean insertInTable(Record record, String table) {
-        List<String> elementsWithNulls = record.getElements().stream()
-            .map(e -> {
-                if (e.isBlank()) return (String)(null);
-                return e;
-            }).toList();
-        int numberColumns = findNumberOfColumns(table);
-        List<Integer> tableTypes = findTableTypes(table);
-        String values = getValues(numberColumns);
-        String query = "INSERT " + table + " VALUES " + values;
         try {
-            PreparedStatement statement = connection.prepareStatement(query);
-            for (int i = 0; i < numberColumns; i++) {
-                statement.setObject(i + 1, elementsWithNulls.get(i), tableTypes.get(i));
-            }
-            statement.executeUpdate();
+            return executeInsert(record, table);
         } catch (SQLException e) {
             return false;
         }
+    }
+
+    private boolean executeInsert(Record record, String table) throws SQLException {
+        List<String> recordWithNulls = fromRecordToListWithNulls(record);
+        int numberColumns = findNumberOfColumns(table);
+        List<Integer> tableTypes = findTableTypes(table);
+        String valuesFormat = MetaDataQueries.getValuesFormat(numberColumns);
+        String query = InsertSelectQueryTexts.getInsertInTable(table, valuesFormat);
+        PreparedStatement statement = connection.prepareStatement(query);
+            for (int i = 0; i < numberColumns; i++) {
+                statement.setObject(i + 1, recordWithNulls.get(i), tableTypes.get(i));
+            }
+            statement.executeUpdate();
         return true;
     }
 
+    private List<String> fromRecordToListWithNulls(Record record) {
+        return record.getElements().stream()
+            .map(this::fromEmptyToNull)
+            .toList();
+    }
+
+    private String fromEmptyToNull(String string) {
+        if (string.isBlank()) {
+            return null;
+        }
+        return string;
+    }
+
+    private int findNumberOfColumns(String table) {
+        return getColumnNames(table).size();
+    }
+
+    private List<Integer> findTableTypes(String table) {
+        String query = InsertSelectQueryTexts.getSelectTableDataTypes(table);
+        try {
+            startQueryExecution(query);
+            return MetaDataQueries.getDataTypes(this.resultSet);
+        } catch (SQLException e) {
+            return List.of();
+        }
+    }
     /**
      * {@inheritDoc}
      */
@@ -233,79 +253,8 @@ public class DatabaseImpl implements Database {
         if (resultList.isEmpty()) {
             return Optional.empty();
         }
-        return Optional.of(getTableFromLists(resultList));
-    }
-
-    private List<Integer> findTableTypes(String table) {
-        List<Integer> tableTypes = new LinkedList<>();
-        String query = "SELECT DATA_TYPE from INFORMATION_SCHEMA.COLUMNS " +
-            "where table_schema = 'restaurant' AND table_name = '" + table + "'";
-        ResultSet resultSet;
-        try {
-            Statement statement = connection.createStatement();
-            resultSet = statement.executeQuery(query);
-            while (resultSet.next()) {
-                tableTypes.add(getJDBCType(resultSet));
-            }
-            return tableTypes;
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return List.of();
-    }
-
-    private Integer getJDBCType(ResultSet resultSet) throws SQLException {
-        if (resultSet.getString(1).equals("int")) {
-            return JDBCType.INTEGER.getVendorTypeNumber();
-        } 
-        return JDBCType.valueOf(resultSet.getString(1).toUpperCase()).getVendorTypeNumber();
-    }
-
-    private String getValues(int numberColumns) {
-        return new StringBuilder().append("(")
-            .append(String.join(",", getIteratorValues(numberColumns)))
-            .append(")")
-            .toString();
-    }
-
-    private Iterable<CharSequence> getIteratorValues(int number) {
-        return new Iterable<CharSequence>() {
-
-            @Override
-            public Iterator<CharSequence> iterator() {
-                return new Iterator<CharSequence>() {
-
-                    private int count = 0;
-
-                    @Override
-                    public boolean hasNext() {
-                        return count < number;
-                    }
-
-                    @Override
-                    public CharSequence next() {
-                        count++;
-                        return "?";
-                    }
-                };
-            
-            } 
-        };
-    }
-
-    private int findNumberOfColumns(String table) {
-        String query = "SELECT count(*) FROM information_schema.columns WHERE table_name = '" + table + "'";
-        ResultSet resultSet;
-        try {
-            Statement statement = connection.createStatement();
-            resultSet = statement.executeQuery(query);
-            while (resultSet.next()) {
-                return resultSet.getInt(1);
-            }
-        } catch (SQLException e) {
-            System.out.println(e.getSQLState());
-        }
-        return 0;
+        return Optional.empty(); //TODO
+        //Optional.of(getTableFromLists(resultList));
     }
 
     private void viewTavoliPrenotatiSalaSLot(List<String> values, List<List<String>> resultList) throws SQLException {
@@ -442,7 +391,7 @@ public class DatabaseImpl implements Database {
             Optional<Object> descrizione = Optional.ofNullable(resultSet.getObject(2));
             rowData.addAll(List.of(
                 nome.get().toString(), 
-                descrizione.isEmpty() ? NULL_VALUE : descrizione.get().toString()
+                descrizione.isEmpty() ? MetaDataQueries.NULL_VALUE : descrizione.get().toString()
             ));
             resultList.add(rowData);
         }
@@ -511,7 +460,6 @@ public class DatabaseImpl implements Database {
         }
     }
 
-    
     /**
      * {@inheritDoc}
      */
@@ -521,14 +469,15 @@ public class DatabaseImpl implements Database {
         String queryString;
         PreparedStatement statement;
         ResultSet resultSet;
-        queryString = "SELECT column_name " +
-            "FROM information_schema.columns " + 
-            "WHERE table_name = '" + tableName + "'";
+        //TODO fix query text in Insert class
+        queryString = InsertSelectQueryTexts.getSelectEveryRecordFromTable(tableName);
         try {
             statement = connection.prepareStatement(queryString);
             resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                columnsList.add(resultSet.getString(1));
+            var metaData = resultSet.getMetaData();
+            int columns = metaData.getColumnCount();
+            for (int i = 1; i <= columns; i++) {
+                columnsList.add(metaData.getColumnName(i));
             }
         } catch (SQLException e) {
             e.printStackTrace();
