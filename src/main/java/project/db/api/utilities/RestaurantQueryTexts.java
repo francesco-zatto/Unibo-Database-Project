@@ -71,7 +71,7 @@ public class RestaurantQueryTexts {
     /**
      * @return query text to view the profit of a Turno
      */
-    public static String visualizzareIncassoTurno() {
+    public static String getvisualizzareIncassoTurno() {
         return "SELECT SUM(P.Conto) " + 
             "FROM Prenotazioni P " +
             "WHERE P.Data = ? " +
@@ -85,7 +85,7 @@ public class RestaurantQueryTexts {
     /**
      * @return query text to view Dipendente with highest salary
      */
-    public static String visualizzareDipendenteStipendioMassimo() {
+    public static String getvisualizzareDipendenteStipendioMassimo() {
         return "SELECT D.Codice, D.CF, D.Nome, D.Cognome " +
             "FROM Dipendenti D, Contratti C " +  
             "WHERE C.CodDipendente = D.Codice " + 

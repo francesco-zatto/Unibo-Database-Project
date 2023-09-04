@@ -6,6 +6,8 @@ package project.db.api.utilities;
  */
 public class InsertSelectQueryTexts {
 
+    private InsertSelectQueryTexts() {}
+
     /**
      * @return query text to select names of database's tables
      */
