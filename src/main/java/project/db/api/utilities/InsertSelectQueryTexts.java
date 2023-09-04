@@ -12,8 +12,8 @@ public class InsertSelectQueryTexts {
      * @return query text to select names of database's tables
      */
     public static String getSelectTableNames() {
-        return "SELECT table_name" +
-            "FROM information_schema.tables" + 
+        return "SELECT table_name " +
+            "FROM information_schema.tables " + 
             "WHERE table_schema = 'restaurant'";
     }
 
@@ -39,7 +39,7 @@ public class InsertSelectQueryTexts {
      * @return query text to select table's columns data types
      */
     public static String getSelectTableDataTypes(String tableName) {
-        return "SELECT DATA_TYPE" + 
+        return "SELECT DATA_TYPE " + 
             "FROM INFORMATION_SCHEMA.COLUMNS " +
             "WHERE table_schema = 'restaurant' AND table_name = '" + tableName + "'";
     }
@@ -49,8 +49,8 @@ public class InsertSelectQueryTexts {
      * @return query text to count table's number of columns
      */
     public static String getCountNumberOfColumns(String tableName) {
-        return "SELECT count(*)" + 
-            "FROM information_schema.columns" +
+        return "SELECT count(*) " + 
+            "FROM information_schema.columns " +
             "WHERE table_name = '" + tableName + "'";
     }
 

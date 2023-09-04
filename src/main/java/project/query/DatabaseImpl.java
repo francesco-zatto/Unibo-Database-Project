@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Optional;
 
 import project.db.api.RestaurantQuery;
+import project.db.api.utilities.InsertSelectQueryTexts;
+import project.db.api.utilities.MetaDataQueries;
 import project.tableFactory.StaticTableFactory;
 
 /**
@@ -23,6 +25,8 @@ public class DatabaseImpl implements Database {
     private static final String NULL_VALUE = "NULL";
 
     private final Connection connection;
+    private Statement statement;
+    private ResultSet resultSet;
 
     /**
      * Constructor with the database's connection
@@ -37,17 +41,30 @@ public class DatabaseImpl implements Database {
      */
     @Override
     public List<String> getTableNames() {
-        List<String> list = new LinkedList<>();
-        String query = "SELECT table_name FROM information_schema.tables WHERE table_schema = 'restaurant'";
-        ResultSet resultSet;
+        final List<String> list;
+        String query = InsertSelectQueryTexts.getSelectTableNames();
         try {
-            Statement statement = connection.createStatement();
-            resultSet = statement.executeQuery(query);
-            while (resultSet.next()) {
-                list.add(resultSet.getString("table_name"));
-            }
+            list = executeTableNamesQuery(query);
         } catch (SQLException e) {
             return List.of();
+        }
+        return list;
+    }
+
+    private List<String> executeTableNamesQuery(final String query) throws SQLException {
+        startQueryExecution(query);
+        return getListFromResultSet();
+    }
+
+    private void startQueryExecution(final String query) throws SQLException {
+        this.statement = connection.createStatement();
+        this.resultSet = statement.executeQuery(query);
+    }
+
+    private List<String> getListFromResultSet() throws SQLException {
+        final List<String> list = new LinkedList<>();
+         while (this.resultSet.next()) {
+            list.add(this.resultSet.getString(MetaDataQueries.TABLE_NAME));
         }
         return list;
     }
@@ -59,7 +76,7 @@ public class DatabaseImpl implements Database {
     public Table getTable(String tableName) {
         List<String> columns = new LinkedList<>();
         List<List<String>> list = new LinkedList<>();
-        String query = "SELECT * FROM " + tableName;
+        String query = InsertSelectQueryTexts.getSelectEveryRecordFromTable(tableName);
         ResultSet resultSet;
         try {
             Statement statement = connection.createStatement();
@@ -86,6 +103,31 @@ public class DatabaseImpl implements Database {
             return StaticTableFactory.getEmptyTable();
         }
         return getTableFromLists(list);
+    }
+
+    private List<List<String>> getEveryRecordFromTable(String query, String tableName) throws SQLException {
+        /*Statement statement = connection.createStatement();
+        ResultSet resultSet = statement.executeQuery(query);
+        ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
+        int columnCount = resultSetMetaData.getColumnCount();
+        List<String> columnsNames = getColumnNames(tableName)
+        for (int i = 1; i <= columnCount; i++) {
+            columns.add(resultSetMetaData.getColumnName(i));
+        }
+        list.add(columns);
+        while (resultSet.next()) {
+            List<String> rowData = new LinkedList<>();
+            for (int i = 1; i <= columnCount; i++) {
+                Optional<Object> currentElement = Optional.ofNullable(resultSet.getObject(i));
+                if (currentElement.isEmpty()) {
+                    rowData.add(NULL_VALUE);
+                } else {
+                    rowData.add(currentElement.get().toString());
+                }
+            }
+            list.add(rowData);
+        }*/
+        return null;
     }
 
     private Table getTableFromLists(List<List<String>> list) {

@@ -85,7 +85,7 @@ public class RestaurantQueryTexts {
     /**
      * @return query text to view Dipendente with highest salary
      */
-    public static String getvisualizzareDipendenteStipendioMassimo() {
+    public static String getVisualizzareDipendenteStipendioMassimo() {
         return "SELECT D.Codice, D.CF, D.Nome, D.Cognome " +
             "FROM Dipendenti D, Contratti C " +  
             "WHERE C.CodDipendente = D.Codice " + 
