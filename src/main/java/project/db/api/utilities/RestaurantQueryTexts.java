@@ -1,4 +1,4 @@
-package project.db.api;
+package project.db.api.utilities;
 
 /**
  * Utility class to get texts to executes restaurant's queries.

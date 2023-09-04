@@ -108,7 +108,7 @@ public class DatabaseImpl implements Database {
             }).toList();
         int numberColumns = findNumberOfColumns(table);
         List<Integer> tableTypes = findTableTypes(table);
-        String values = this.getValues(numberColumns);
+        String values = getValues(numberColumns);
         String query = "INSERT " + table + " VALUES " + values;
         try {
             PreparedStatement statement = connection.prepareStatement(query);
