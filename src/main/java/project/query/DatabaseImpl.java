@@ -13,9 +13,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import com.google.protobuf.Option;
-import com.mysql.cj.util.StringUtils;
-
 import project.db.api.RestaurantQuery;
 import project.db.api.utilities.InsertSelectQueryTexts;
 import project.db.api.utilities.MetaDataQueries;
