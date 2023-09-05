@@ -61,7 +61,8 @@ public class InsertSelectQueryTexts {
     public static String getColumnNamesFromTable(String tableName) {
         return "SELECT column_name " +
             "FROM information_schema.columns " + 
-            "WHERE table_name = '" + tableName + "'";
+            "WHERE table_name = '" + tableName + "'" + 
+            "ORDER BY ordinal_position";
     }
 
 }
