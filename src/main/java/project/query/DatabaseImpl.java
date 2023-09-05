@@ -207,19 +207,19 @@ public class DatabaseImpl implements Database {
      */
     @Override
     public List<String> getColumnNames(String tableName) {
-        List<String> columnsList = new LinkedList<>();
-        String queryString;
-        PreparedStatement statement;
-        ResultSet resultSet;
-        queryString = InsertSelectQueryTexts.getColumnNamesFromTable(tableName);
+        String queryString = InsertSelectQueryTexts.getColumnNamesFromTable(tableName);
         try {
-            statement = connection.prepareStatement(queryString);
-            resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                columnsList.add(resultSet.getString(1));
-            }
+            return runSelectColumnNames(queryString);
         } catch (SQLException e) {
             return List.of();
+        }
+    }
+
+    private List<String> runSelectColumnNames(String queryString) throws SQLException {
+        List<String> columnsList = new LinkedList<>();
+        startQueryExecution(queryString);
+        while (this.resultSet.next()) {
+            columnsList.add(resultSet.getString(1));
         }
         return columnsList;
     }
