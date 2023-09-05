@@ -39,14 +39,12 @@ public class DatabaseImpl implements Database {
      */
     @Override
     public List<String> getTableNames() {
-        final List<String> list;
         String query = InsertSelectQueryTexts.getSelectTableNames();
         try {
-            list = executeTableNamesQuery(query);
+            return executeTableNamesQuery(query);
         } catch (SQLException e) {
             return List.of();
         }
-        return list;
     }
 
     private List<String> executeTableNamesQuery(final String query) throws SQLException {
@@ -72,14 +70,12 @@ public class DatabaseImpl implements Database {
      */
     @Override
     public Table getTable(String tableName) {
-        Table table = StaticTableFactory.getEmptyTable();
         String query = InsertSelectQueryTexts.getSelectEveryRecordFromTable(tableName);
         try {
-            table = getEveryRecordFromTable(query, tableName);
+            return getEveryRecordFromTable(query, tableName);
         } catch (SQLException e) {
-            return table;
+            return StaticTableFactory.getEmptyTable();
         }
-        return table;
     }
 
     private Table getEveryRecordFromTable(String query, String tableName) throws SQLException {
@@ -150,10 +146,10 @@ public class DatabaseImpl implements Database {
         String valuesFormat = MetaDataQueries.getValuesFormat(numberColumns);
         String query = InsertSelectQueryTexts.getInsertInTable(table, valuesFormat);
         PreparedStatement statement = connection.prepareStatement(query);
-            for (int i = 0; i < numberColumns; i++) {
-                statement.setObject(i + 1, recordWithNulls.get(i), tableTypes.get(i));
-            }
-            statement.executeUpdate();
+        for (int i = 0; i < numberColumns; i++) {
+            statement.setObject(i + 1, recordWithNulls.get(i), tableTypes.get(i));
+        }
+        statement.executeUpdate();
         return true;
     }
 
