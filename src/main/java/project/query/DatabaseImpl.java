@@ -191,25 +191,7 @@ public class DatabaseImpl implements Database {
      */
     @Override
     public List<String> getQueryValues(RestaurantQuery query) {
-        switch (query) {
-            case INSERIRE_CONTO_A_PRENOTAZIONE_SALVATA:
-                return List.of("Conto", "CodPrenotazione");
-            case VISUALIZZARE_ALLERGENI_PIATTO:
-                return List.of("CodPiatto");
-            case VISUALIZZARE_DIPENDENTE_STIPENDIO_MASSIMO:
-                return List.of();
-            case VISUALIZZARE_FORNITORI_DI_INGREDIENTE:
-                return List.of("CodIngrediente");
-            case VISUALIZZARE_INCASSO_TURNO:
-                return List.of("Data", "OraInizioTurno", "OraFineTurno");
-            case VISUALIZZARE_PORTATA_CUOCO_GIORNO:
-                return List.of("Data", "CodiceCuoco");
-            case VISUALIZZARE_PRENOTAZIONI_CON_SLOT_AGGIUNTIVO:
-                return List.of("Data");
-            case VISUALIZZARE_TAVOLI_PRENOTATI_IN_SALA_E_SLOT:
-                return List.of("NumeroSala", "CodSlot");
-        }
-        return List.of();
+        return query.getRequestedValues();
     }
 
     /**
