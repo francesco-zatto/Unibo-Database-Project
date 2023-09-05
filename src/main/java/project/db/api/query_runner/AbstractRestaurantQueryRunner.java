@@ -22,7 +22,7 @@ public abstract class AbstractRestaurantQueryRunner implements RestaurantQueryRu
      * {@inheritDoc}
      */
     @Override
-    public Table runQuery(Connection connection, List<String> values) throws SQLException {
+    public final Table runQuery(Connection connection, List<String> values) throws SQLException {
         String queryString = getQueryText();
         List<Record> recordList = new LinkedList<>();
         recordList.add(new RecordImpl(getColumnsNames()));
