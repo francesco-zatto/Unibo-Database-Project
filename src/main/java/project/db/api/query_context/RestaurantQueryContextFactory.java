@@ -1,23 +1,18 @@
 package project.db.api.query_context;
 
-import java.util.List;
-
 import static project.db.api.utilities.RestaurantQueryDescriptions.*;
 import static project.db.api.utilities.RestaurantQueryTexts.*;
 import static project.db.api.utilities.RestaurantQueryValues.*;
-
 
 /**
  * Factory for RestaurantQueryContexts, a class with the needed query text, description and required values.
  */
 public class RestaurantQueryContextFactory {
 
-    private record RestaurantQueryContext(String queryText, String description, List<String> reuqireValues) {}
-
     public static RestaurantQueryContext getAllergeniPiattoContext() {
         return new RestaurantQueryContext(
-            getVisualizzareAllergeniPiattoDescription(), 
-            getVisualizzareAllergeniPiatto(),
+            getVisualizzareAllergeniPiatto(), 
+            getVisualizzareAllergeniPiattoDescription(),
             getVisualizzareAllergeniPiattoValues()
         );
     }

@@ -1,11 +1,14 @@
 package project.db.api;
 
-import static project.db.api.utilities.RestaurantQueryDescriptions.*;
-import static project.db.api.utilities.RestaurantQueryTexts.*;
-import static project.db.api.utilities.RestaurantQueryValues.*;
+import static project.db.api.query_context.RestaurantQueryContextFactory.*;
 
-import java.util.Collections;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
+
+import project.db.api.query_context.RestaurantQueryContext;
+import project.db.api.query_runner.*;
+import project.query.Table;
 
 /**
  * Enum with the possible query to do on the database, except the ones to select every record of a table.
@@ -13,68 +16,66 @@ import java.util.List;
 public enum RestaurantQuery {
 
     INSERIRE_CONTO_A_PRENOTAZIONE_SALVATA(
-        getInserireContoDescription(), 
-        getInserireContoPrenotazioneSalvata(),
-        getInserireContoValues()
+        getInserireContoContext(),
+        new InserireContoRunner()
     ),
     VISUALIZZARE_TAVOLI_PRENOTATI_IN_SALA_E_SLOT(
-        getVisualizzareTavoliPrenotatiDescription(), 
-        getVisualizzareTavoliPrenotati(),
-        getVisualizzareTavoliPrenotatiValues()
+        getTavoliPrenotatiContext(),
+        new TavoliPrenotatiRunner()
     ),
     VISUALIZZARE_PORTATA_CUOCO_GIORNO(
-        getVisualizzarePortataDescription(), 
-        getVisualizzarePortataCuocoGiorno(),
-        getVisualizzarePortataValues()
+        getPortataCuocoContext(),
+        new PortataCuocoGiornoRunner()
     ),
     VISUALIZZARE_ALLERGENI_PIATTO(
-        getVisualizzareAllergeniPiattoDescription(), 
-        getVisualizzareAllergeniPiatto(),
-        getVisualizzareAllergeniPiattoValues()
+        getAllergeniPiattoContext(),
+        new AllergeniPiattoRunner()
     ),
     VISUALIZZARE_FORNITORI_DI_INGREDIENTE(
-        getVisualizzareFornitoriIngredienteDescription(),
-        getVisualizzareFornitoriIngrediente(),
-        getVisualizzareFornitoriIngredienteValues()
+        getFornitoriIngredienteContext(),
+        new FornitoriIngredienteRunner()
     ),
     VISUALIZZARE_INCASSO_TURNO(
-        getVisualizzareIncassoTurnoDescription(), 
-        getvisualizzareIncassoTurno(),
-        getVisualizzareIncassoTurnoValues()
+        getIncassoTurnoContext(),
+        new IncassoTurnoRunner()
     ),
     VISUALIZZARE_DIPENDENTE_STIPENDIO_MASSIMO(
-        getVisualizzareDipendenteStipendioMassimoDescription(),
-        getVisualizzareDipendenteStipendioMassimo(),
-        getVisualizzareDipendenteStipendioMassimoValues()
+        getDipendenteStipendioMassimoContext(),
+        new DipendenteStipendioMassimoRunner()
     ),
     VISUALIZZARE_PRENOTAZIONI_CON_SLOT_AGGIUNTIVO(
-        getVisualizzarePrenotazioniSlotAggiuntivoDescription(),
-        getVisualizzarePrenotazioniSlotAggiuntivo(),
-        getVisualizzarePrenotazioniSlotAggiuntivoValues()
+        getPrenotazioniSlotAggiuntivoContext(),
+        new PrenotazioniSlotAggiuntivoRunner()
     );
     
-    private final String description;
-    private final String queryText;
-    private final List<String> requestedValues;
+    private final RestaurantQueryContext context;
+    private final RestaurantQueryRunner runner;
 
-    private RestaurantQuery(String description, String queryText, List<String> values) {
-        this.description = description;
-        this.queryText = queryText;
-        this.requestedValues = Collections.unmodifiableList(values);
+    private RestaurantQuery(RestaurantQueryContext context, RestaurantQueryRunner runner) {
+        this.context = context;
+        this.runner = runner;
     }
 
     /**
      * @return requested values to run correctly the query
      */
     public List<String> getRequestedValues() {
-        return this.requestedValues;
+        return this.context.requiredValues();
     }
 
     /**
      * @return query text to execute query in a database
      */
     public String getQueryText() {
-        return this.queryText;
+        return this.context.queryText();
+    }
+
+    /**
+     * @param connection database's connection
+     * @return result's table
+     */
+    public Table runQuery(Connection connection, List<String> values) throws SQLException {
+        return this.runner.runQuery(connection, values);
     }
 
     /**
@@ -82,7 +83,7 @@ public enum RestaurantQuery {
      */
     @Override
     public String toString() {
-        return this.description;
+        return this.context.description();
     }
     
 }
