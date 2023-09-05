@@ -13,6 +13,9 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import com.google.protobuf.Option;
+import com.mysql.cj.util.StringUtils;
+
 import project.db.api.RestaurantQuery;
 import project.db.api.utilities.InsertSelectQueryTexts;
 import project.db.api.utilities.MetaDataQueries;
@@ -165,10 +168,9 @@ public class DatabaseImpl implements Database {
     }
 
     private String fromEmptyToNull(String string) {
-        if (string.isBlank()) {
-            return null;
-        }
-        return string;
+        return Optional.of(string)
+                .filter(s -> !s.isBlank())
+                .orElse(null);
     }
 
     private int findNumberOfColumns(String table) {
@@ -469,18 +471,14 @@ public class DatabaseImpl implements Database {
         String queryString;
         PreparedStatement statement;
         ResultSet resultSet;
-        //TODO fix query text in Insert class
-        queryString = InsertSelectQueryTexts.getSelectEveryRecordFromTable(tableName);
+        queryString = InsertSelectQueryTexts.getColumnNamesFromTable(tableName);
         try {
             statement = connection.prepareStatement(queryString);
             resultSet = statement.executeQuery();
-            var metaData = resultSet.getMetaData();
-            int columns = metaData.getColumnCount();
-            for (int i = 1; i <= columns; i++) {
-                columnsList.add(metaData.getColumnName(i));
+            while (resultSet.next()) {
+                columnsList.add(resultSet.getString(1));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
             return List.of();
         }
         return columnsList;
